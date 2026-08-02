@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Dino Runner 3D</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html, body {
+    background:#1a1a2e; color:#eee; font-family:'Segoe UI', Arial, sans-serif;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    min-height:100vh; user-select:none; overflow:hidden; touch-action:none;
+  }
+  h1 { margin:10px 0 8px; letter-spacing:2px; text-align:center; font-size:20px; }
+  #gameWrap { position:relative; width:min(920px,98vw); aspect-ratio: 16/9; touch-action:none; }
+  #three-container { width:100%; height:100%; border-radius:10px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,.5); touch-action:none; }
+  canvas { display:block; }
+  #errBox {
+    position:absolute; inset:0; background:#200; color:#f88; font-family:monospace; font-size:12px;
+    padding:14px; overflow:auto; z-index:50; white-space:pre-wrap;
+  }
+  #hud {
+    position:absolute; top:8px; left:0; right:0; display:flex; justify-content:space-between;
+    padding:0 16px; font-weight:bold; font-size:14px; color:#fff; text-shadow:0 1px 4px rgba(0,0,0,.8);
+    pointer-events:none;
+  }
+  #overlay {
+    position:absolute; inset:0; background:rgba(12,12,25,.82); border-radius:10px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:12px;
+    overflow-y:auto; z-index:10;
+  }
+  .hidden { display:none !important; }
+  .label { font-size:11px; letter-spacing:1px; color:#cde; text-transform:uppercase; margin-top:4px; }
+  .row { display:flex; gap:7px; flex-wrap:wrap; justify-content:center; max-width:480px; }
+  .swatch {
+    width:54px; height:54px; border-radius:10px; border:2px solid rgba(255,255,255,.15);
+    background:rgba(20,20,40,.9); display:flex; flex-direction:column; align-items:center; justify-content:center;
+    cursor:pointer; gap:3px; transition:.15s;
+  }
+  .swatch:hover { transform:translateY(-2px); }
+  .swatch.selected { border-color:#4ade80; box-shadow:0 0 12px rgba(74,222,128,.6); }
+  .swatch span { font-size:8px; color:#ddd; text-align:center; }
+  .dinoIcon { width:22px; height:22px; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:15px; }
+  .mapCard {
+    width:84px; height:46px; border-radius:8px; border:2px solid rgba(255,255,255,.15);
+    cursor:pointer; display:flex; align-items:flex-end; justify-content:center; padding-bottom:4px;
+    font-size:10px; font-weight:bold; color:#222; transition:.15s;
+  }
+  .mapCard:hover { transform:translateY(-2px); }
+  .mapCard.selected { border-color:#4ade80; box-shadow:0 0 12px rgba(74,222,128,.6); }
+  button.play {
+    margin-top:6px; padding:9px 24px; font-size:14px; font-weight:bold; border:none; border-radius:8px;
+    background:#4ade80; color:#0a2; cursor:pointer;
+  }
+  button.play:hover { background:#5eead4; }
+  #title { font-size:18px; font-weight:bold; color:#fff; text-align:center; }
+  #sub { font-size:11px; color:#cde; text-align:center; max-width:440px; }
+  #ghostNote { font-size:10px; color:#c084fc; }
+
+  #touchControls {
+    position:absolute; bottom:14px; left:0; right:0; z-index:20; pointer-events:none;
+  }
+  .ctlBtn {
+    position:absolute; bottom:0; width:78px; height:78px; border-radius:50%;
+    border:2px solid rgba(255,255,255,.4);
+    background:rgba(20,20,40,.5); color:#fff; font-size:15px; font-weight:bold;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+    touch-action:none; cursor:pointer; backdrop-filter:blur(3px); pointer-events:auto;
+  }
+  .ctlBtn .ico { font-size:24px; }
+  .ctlBtn:active { background:rgba(74,222,128,.6); transform:scale(0.94); }
+  #btnDuck { left:16px; }
+  #btnJump { right:16px; }
+  #vignette {
+    position:absolute; inset:0; pointer-events:none; border-radius:10px;
+    box-shadow: inset 0 0 90px 20px rgba(0,0,0,.45);
+  }
+</style>
+</head>
+<body>
+<h1>🦖 DINO RUNNER 3D</h1>
+<div id="gameWrap">
+  <div id="three-container"></div>
+  <div id="errBox" class="hidden"></div>
+  <div id="hud">
+    <div id="mapName">Día</div>
+    <div><span id="score">0</span> &nbsp;|&nbsp; Récord: <span id="highScore">0</span></div>
+  </div>
+  <div id="vignette"></div>
+  <div id="touchControls">
+    <div class="ctlBtn" id="btnDuck"><span class="ico">⬇️</span>Agachar</div>
+    <div class="ctlBtn" id="btnJump"><span class="ico">⬆️</span>Saltar</div>
+  </div>
+  <div id="overlay">
+    <div id="title">Elige tu dino</div>
+    <div class="row" id="dinoRow"></div>
+    <div id="ghostNote" class="hidden">👻 El Dino Fantasma es inmortal: nunca choca ni pierde.</div>
+    <div class="label">Ropa / Accesorios</div>
+    <div class="row" id="accRow"></div>
+    <div class="label">Elige el mapa</div>
+    <div class="row" id="mapRow"></div>
+    <button class="play" id="playBtn">▶️ JUGAR (Espacio)</button>
+    <div id="sub">Carriles: ← → / A D / arrastra o botones. Salta: Espacio / ↑. Agáchate: ↓ / S. ¡Infinito!</div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+window.addEventListener('error', function(e){
+  const box = document.getElementById('errBox');
+  box.classList.remove('hidden');
+  box.textContent = 'Error: ' + e.message + '\n' + (e.filename||'') + ':' + (e.lineno||'');
+});
+
+(function(){
+  // ================= DATA =================
+  const DINOS = [
+    { id:'verde',    name:'Rex Verde',  color:0x2e7d32, ghost:false },
+    { id:'azul',     name:'Rex Azul',   color:0x1565c0, ghost:false },
+    { id:'rojo',     name:'Rex Rojo',   color:0xc62828, ghost:false },
+    { id:'dorado',   name:'Rex Dorado', color:0xf9a825, ghost:false },
+    { id:'fantasma', name:'Dino Fantasma', color:0xd8c8ff, ghost:true },
+  ];
+  const ACCESSORIES = [
+    { id:'ninguno',  name:'Ninguno',  emoji:'' },
+    { id:'gorra',    name:'Gorra',    emoji:'🧢' },
+    { id:'lentes',   name:'Lentes',   emoji:'🕶️' },
+    { id:'corona',   name:'Corona',   emoji:'👑' },
+    { id:'bufanda',  name:'Bufanda',  emoji:'🧣' },
+    { id:'mono',     name:'Moño',     emoji:'🎀' },
+    { id:'fiesta',   name:'Fiesta',   emoji:'🎉' },
+  ];
+  const MAPS = {
+    dia:   { name:'Día',   sky:0x8ec9ff, ground:0xd8c48a, fogNear:16, fogFar:65, ambient:0xffffff, ambientI:0.95, sun:0xffffff, sunI:1.0, stars:false },
+    tarde: { name:'Tarde', sky:0xff9a5a, ground:0xc98f5c, fogNear:13, fogFar:55, ambient:0xffcf9e, ambientI:0.8, sun:0xffb366, sunI:0.9, stars:false },
+    noche: { name:'Noche', sky:0x0b1030, ground:0x33334a, fogNear:10, fogFar:48, ambient:0x5566aa, ambientI:0.55, sun:0x8899ff, sunI:0.55, stars:true },
+  };
+  const LANES = [-2.1, 0, 2.1];
+
+  let state = { selectedDino:'verde', selectedMap:'dia', selectedAccessory:'ninguno', highScore:0 };
+
+  // ================= MENU UI (no depende de Three.js) =================
+  const dinoRow = document.getElementById('dinoRow');
+  const mapRow = document.getElementById('mapRow');
+  const accRow = document.getElementById('accRow');
+  const ghostNote = document.getElementById('ghostNote');
+
+  function renderMenus(){
+    dinoRow.innerHTML = '';
+    DINOS.forEach(d=>{
+      const el = document.createElement('div');
+      el.className = 'swatch' + (state.selectedDino===d.id ? ' selected':'');
+      const hex = '#'+d.color.toString(16).padStart(6,'0');
+      el.innerHTML = '<div class="dinoIcon" style="background:'+hex+'"></div><span>'+d.name+'</span>';
+      el.addEventListener('click', function(){
+        state.selectedDino = d.id;
+        saveState();
+        renderMenus();
+        safeBuildDino();
+      });
+      dinoRow.appendChild(el);
+    });
+    ghostNote.classList.toggle('hidden', state.selectedDino !== 'fantasma');
+
+    accRow.innerHTML = '';
+    ACCESSORIES.forEach(a=>{
+      const el = document.createElement('div');
+      el.className = 'swatch' + (state.selectedAccessory===a.id ? ' selected':'');
+      el.innerHTML = '<div class="dinoIcon">'+(a.emoji||'✖️')+'</div><span>'+a.name+'</span>';
+      el.addEventListener('click', function(){
+        state.selectedAccessory = a.id;
+        saveState();
+        renderMenus();
+        safeBuildDino();
+      });
+      accRow.appendChild(el);
+    });
+
+    mapRow.innerHTML = '';
+    Object.keys(MAPS).forEach(function(key){
+      const m = MAPS[key];
+      const el = document.createElement('div');
+      el.className = 'mapCard' + (state.selectedMap===key ? ' selected':'');
+      const hex = '#'+m.sky.toString(16).padStart(6,'0');
+      el.style.background = hex;
+      el.style.color = key==='noche' ? '#fff' : '#333';
+      el.textContent = m.name;
+      el.addEventListener('click', function(){
+        state.selectedMap = key;
+        saveState();
+        renderMenus();
+        safeApplyMapVisuals();
+      });
+      mapRow.appendChild(el);
+    });
+
+    document.getElementById('mapName').textContent = MAPS[state.selectedMap].name;
+    document.getElementById('highScore').textContent = state.highScore;
+  }
+  renderMenus(); // UI funcional desde ya, aunque Three.js aun no cargue
+
+  async function loadState(){
+    try {
+      const r = await window.storage.get('dino-game-save-3d');
+      if (r && r.value) state = Object.assign(state, JSON.parse(r.value));
+    } catch(e) {}
+    renderMenus();
+    safeApplyMapVisuals();
+    safeBuildDino();
+  }
+  async function saveState(){
+    try { await window.storage.set('dino-game-save-3d', JSON.stringify(state)); }
+    catch(e) { console.error('No se pudo guardar', e); }
+  }
+
+  // ================= THREE.JS SETUP =================
+  let threeReady = false;
+  let scene, camera, renderer, ambient, sun, groundMat, stars, dashesA, dashesB, rocks, TRACK_LEN;
+  let skyDome, clouds, moonSprite;
+  let dinoGroup = null;
+
+  function makeCloudSprite(){
+    const cnv = document.createElement('canvas');
+    cnv.width = 128; cnv.height = 64;
+    const c = cnv.getContext('2d');
+    c.filter = 'blur(6px)';
+    c.fillStyle = 'rgba(255,255,255,0.9)';
+    c.beginPath();
+    c.ellipse(45,34,32,16,0,0,Math.PI*2);
+    c.ellipse(75,30,26,14,0,0,Math.PI*2);
+    c.ellipse(90,38,22,13,0,0,Math.PI*2);
+    c.fill();
+    const tex = new THREE.CanvasTexture(cnv);
+    const mat = new THREE.SpriteMaterial({ map:tex, transparent:true, depthWrite:false, fog:false });
+    return new THREE.Sprite(mat);
+  }
+  function makeGlowSprite(hex, size){
+    const cnv = document.createElement('canvas');
+    cnv.width = 128; cnv.height = 128;
+    const c = cnv.getContext('2d');
+    const g = c.createRadialGradient(64,64,4,64,64,64);
+    const hexStr = '#'+hex.toString(16).padStart(6,'0');
+    g.addColorStop(0, hexStr);
+    g.addColorStop(0.35, hexStr);
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    c.fillStyle = g;
+    c.fillRect(0,0,128,128);
+    const tex = new THREE.CanvasTexture(cnv);
+    const mat = new THREE.SpriteMaterial({ map:tex, transparent:true, depthWrite:false, fog:false });
+    const spr = new THREE.Sprite(mat);
+    spr.scale.set(size,size,1);
+    return spr;
+  }
+  function makeShadowBlob(scale){
+    const cnv = document.createElement('canvas');
+    cnv.width = 64; cnv.height = 64;
+    const c = cnv.getContext('2d');
+    const g = c.createRadialGradient(32,32,2,32,32,30);
+    g.addColorStop(0,'rgba(0,0,0,0.5)');
+    g.addColorStop(1,'rgba(0,0,0,0)');
+    c.fillStyle = g; c.fillRect(0,0,64,64);
+    const tex = new THREE.CanvasTexture(cnv);
+    const mat = new THREE.MeshBasicMaterial({ map:tex, transparent:true, depthWrite:false });
+    const geo = new THREE.PlaneGeometry(scale, scale);
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.rotation.x = -Math.PI/2;
+    return mesh;
+  }
+
+  function initThree(){
+    const container = document.getElementById('three-container');
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(55, container.clientWidth/container.clientHeight, 0.1, 300);
+    camera.position.set(0, 4.6, 9.4);
+
+    renderer = new THREE.WebGLRenderer({ antialias:true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.shadowMap.enabled = true;
+    container.appendChild(renderer.domElement);
+
+    window.addEventListener('resize', function(){
+      camera.aspect = container.clientWidth/container.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight);
+    });
+
+    ambient = new THREE.HemisphereLight(0x8ec9ff, 0xd8c48a, 0.9);
+    scene.add(ambient);
+    sun = new THREE.DirectionalLight(0xffffff, 1.15);
+    sun.position.set(-6, 14, 6);
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(2048,2048);
+    sun.shadow.camera.near = 1;
+    sun.shadow.camera.far = 40;
+    sun.shadow.camera.left = -12; sun.shadow.camera.right = 12;
+    sun.shadow.camera.top = 12; sun.shadow.camera.bottom = -12;
+    sun.shadow.bias = -0.002;
+    scene.add(sun);
+
+    // cielo degradado (skydome) en vez de color plano
+    function makeSkyTexture(topHex, bottomHex){
+      const cnv = document.createElement('canvas');
+      cnv.width = 2; cnv.height = 256;
+      const ctx2 = cnv.getContext('2d');
+      const g = ctx2.createLinearGradient(0,0,0,256);
+      g.addColorStop(0, topHex); g.addColorStop(1, bottomHex);
+      ctx2.fillStyle = g; ctx2.fillRect(0,0,2,256);
+      const tex = new THREE.CanvasTexture(cnv);
+      tex.needsUpdate = true;
+      return tex;
+    }
+    const skyGeo = new THREE.SphereGeometry(140, 24, 16);
+    const skyMat = new THREE.MeshBasicMaterial({ map: makeSkyTexture('#8ec9ff','#eaf7ff'), side: THREE.BackSide, fog:false });
+    skyDome = new THREE.Mesh(skyGeo, skyMat);
+    scene.add(skyDome);
+
+    // nubes (sprites) para dia/tarde
+    clouds = [];
+    for (let i=0;i<7;i++){
+      const spr = makeCloudSprite();
+      spr.position.set((Math.random()-0.5)*60, 14+Math.random()*10, -20-Math.random()*90);
+      spr.scale.set(9+Math.random()*6, 4+Math.random()*2, 1);
+      scene.add(spr); clouds.push(spr);
+    }
+    // luna para modo noche
+    moonSprite = makeGlowSprite(0xfff6d8, 4.5);
+    moonSprite.position.set(14, 20, -60);
+    scene.add(moonSprite);
+
+    const groundGeo = new THREE.PlaneGeometry(20, 260);
+    groundMat = new THREE.MeshStandardMaterial({ color:0xd8c48a });
+    const ground = new THREE.Mesh(groundGeo, groundMat);
+    ground.rotation.x = -Math.PI/2;
+    ground.position.set(0,0,-90);
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    // lineas divisorias de los 3 carriles (2 lineas, en x=-1.05 y x=1.05)
+    const DASH_COUNT = 40, DASH_SPACING = 5;
+    TRACK_LEN = DASH_COUNT*DASH_SPACING;
+    const dashGeo = new THREE.BoxGeometry(0.16, 0.02, 1.3);
+    const dashMat = new THREE.MeshStandardMaterial({ color:0x5a4632 });
+    dashesA = []; dashesB = [];
+    for (let i=0;i<DASH_COUNT;i++){
+      const mA = new THREE.Mesh(dashGeo, dashMat);
+      mA.position.set(-1.05, 0.011, -10 - i*DASH_SPACING);
+      scene.add(mA); dashesA.push(mA);
+      const mB = new THREE.Mesh(dashGeo, dashMat);
+      mB.position.set(1.05, 0.011, -10 - i*DASH_SPACING - DASH_SPACING/2);
+      scene.add(mB); dashesB.push(mB);
+    }
+
+    rocks = [];
+    const rockGeo = new THREE.DodecahedronGeometry(0.5, 0);
+    const rockMat = new THREE.MeshStandardMaterial({ color:0x8a7a5a });
+    for (let i=0;i<16;i++){
+      const side = i%2===0 ? -1 : 1;
+      const m = new THREE.Mesh(rockGeo, rockMat);
+      m.position.set(side*(6+Math.random()*2), 0.4, -10 - i*10 - Math.random()*6);
+      m.rotation.set(Math.random(),Math.random(),Math.random());
+      m.castShadow = true;
+      scene.add(m); rocks.push(m);
+    }
+
+    const starGeo = new THREE.BufferGeometry();
+    const starCount = 200;
+    const starPos = new Float32Array(starCount*3);
+    for(let i=0;i<starCount;i++){
+      starPos[i*3] = (Math.random()-0.5)*80;
+      starPos[i*3+1] = 6 + Math.random()*25;
+      starPos[i*3+2] = -Math.random()*120;
+    }
+    starGeo.setAttribute('position', new THREE.BufferAttribute(starPos,3));
+    const starMat = new THREE.PointsMaterial({ color:0xffffff, size:0.35 });
+    stars = new THREE.Points(starGeo, starMat);
+    scene.add(stars);
+
+    dinoGroup = new THREE.Group();
+    scene.add(dinoGroup);
+
+    threeReady = true;
+  }
+
+  function applyMapVisuals(){
+    const m = MAPS[state.selectedMap];
+    scene.fog = new THREE.Fog(m.sky, m.fogNear, m.fogFar);
+    groundMat.color.setHex(m.ground);
+    const topHex = '#'+m.sky.toString(16).padStart(6,'0');
+    const bottomHex = state.selectedMap==='noche' ? '#12183f' : (state.selectedMap==='tarde' ? '#ffd9a0' : '#eaf7ff');
+    skyDome.material.map.dispose();
+    skyDome.material.map = (function(){
+      const cnv = document.createElement('canvas'); cnv.width=2; cnv.height=256;
+      const c2 = cnv.getContext('2d');
+      const g = c2.createLinearGradient(0,0,0,256);
+      g.addColorStop(0, topHex); g.addColorStop(1, bottomHex);
+      c2.fillStyle = g; c2.fillRect(0,0,2,256);
+      const tex = new THREE.CanvasTexture(cnv); tex.needsUpdate = true; return tex;
+    })();
+    skyDome.material.needsUpdate = true;
+    ambient.color.setHex(m.sky); ambient.groundColor.setHex(m.ground); ambient.intensity = m.ambientI;
+    sun.color.setHex(m.sun); sun.intensity = m.sunI;
+    stars.visible = m.stars;
+    moonSprite.visible = m.stars;
+    clouds.forEach(function(c){ c.visible = !m.stars; });
+    document.getElementById('mapName').textContent = m.name;
+  }
+  function safeApplyMapVisuals(){ if (threeReady) applyMapVisuals(); }
+
+  function makeEmojiSprite(emoji, size){
+    const cnv = document.createElement('canvas');
+    cnv.width = 128; cnv.height = 128;
+    const c = cnv.getContext('2d');
+    c.font = '96px serif';
+    c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.fillText(emoji, 64, 70);
+    const tex = new THREE.CanvasTexture(cnv);
+    const mat = new THREE.SpriteMaterial({ map:tex, transparent:true });
+    const spr = new THREE.Sprite(mat);
+    spr.scale.set(size, size, 1);
+    return spr;
+  }
+
+  let dinoShadowBlob = null;
+  function buildDino(){
+    scene.remove(dinoGroup);
+    if (dinoShadowBlob) scene.remove(dinoShadowBlob);
+    dinoShadowBlob = makeShadowBlob(1.3);
+    dinoShadowBlob.position.set(LANES[laneIndex], 0.015, 0);
+    scene.add(dinoShadowBlob);
+    dinoGroup = new THREE.Group();
+    const d = DINOS.find(function(x){ return x.id===state.selectedDino; });
+    const matOpts = { color:d.color };
+    if (d.ghost){ matOpts.transparent = true; matOpts.opacity = 0.55; matOpts.emissive = 0x8866ff; matOpts.emissiveIntensity = 0.4; }
+    const mat = new THREE.MeshStandardMaterial(matOpts);
+
+    const body = new THREE.Mesh(new THREE.BoxGeometry(0.95,0.85,1.5), mat);
+    body.position.set(0,0.95,0); body.castShadow = true;
+    const head = new THREE.Mesh(new THREE.BoxGeometry(0.62,0.55,0.62), mat);
+    head.position.set(0,1.55,0.85); head.castShadow = true;
+    const snout = new THREE.Mesh(new THREE.BoxGeometry(0.4,0.3,0.4), mat);
+    snout.position.set(0,1.42,1.25); snout.castShadow = true;
+    const tail = new THREE.Mesh(new THREE.BoxGeometry(0.4,0.35,0.9), mat);
+    tail.position.set(0,0.85,-1.05); tail.rotation.x = 0.25; tail.castShadow = true;
+    const legGeo = new THREE.BoxGeometry(0.3,0.55,0.35);
+    const legL = new THREE.Mesh(legGeo, mat); legL.position.set(-0.28,0.28,0.15); legL.castShadow = true;
+    const legR = new THREE.Mesh(legGeo, mat); legR.position.set(0.28,0.28,-0.1); legR.castShadow = true;
+    const eye = new THREE.Mesh(new THREE.BoxGeometry(0.1,0.1,0.05), new THREE.MeshStandardMaterial({color:0xffffff}));
+    eye.position.set(0.2,1.65,1.15);
+
+    dinoGroup.add(body, head, snout, tail, legL, legR, eye);
+    dinoGroup.userData.legs = [legL, legR];
+
+    if (d.ghost){
+      const ghostSprite = makeEmojiSprite('👻', 0.6);
+      ghostSprite.position.set(-0.5, 2.15, 0.6);
+      dinoGroup.add(ghostSprite);
+    }
+    const acc = ACCESSORIES.find(function(a){ return a.id===state.selectedAccessory; });
+    if (acc && acc.emoji){
+      const accessorySprite = makeEmojiSprite(acc.emoji, 0.7);
+      accessorySprite.position.set(0, 2.05, 0.85);
+      dinoGroup.add(accessorySprite);
+    }
+
+    dinoGroup.position.set(LANES[laneIndex],0,0);
+    scene.add(dinoGroup);
+  }
+  function safeBuildDino(){ if (threeReady) buildDino(); }
+
+  // ================= GAME STATE =================
+  const DUCK_SCALE = 0.55;
+  const JUMP_CLEAR = 0.85;
+  let laneIndex = 1;
+  let physics = { vy:0, jumping:false, ducking:false, y:0 };
+  let obstacles = [];
+  let speed, score, running, spawnFrames, walkT;
+
+  function resetGame(){
+    obstacles.forEach(function(o){ scene.remove(o.mesh); });
+    obstacles = [];
+    laneIndex = 1;
+    physics = { vy:0, jumping:false, ducking:false, y:0 };
+    dinoGroup.position.set(LANES[laneIndex],0,0);
+    dinoGroup.scale.set(1,1,1);
+    speed = 0.15;
+    score = 0;
+    spawnFrames = 60;
+    walkT = 0;
+    running = true;
+  }
+
+  function makeCactus(lane){
+    const g = new THREE.Group();
+    const cMat = new THREE.MeshStandardMaterial({ color: state.selectedMap==='noche' ? 0x6fae6f : 0x2e7d32 });
+    const h = 0.9 + Math.random()*0.5;
+    const trunk = new THREE.Mesh(new THREE.BoxGeometry(0.35,h,0.35), cMat);
+    trunk.position.y = h/2; trunk.castShadow = true;
+    g.add(trunk);
+    if (Math.random()>0.4){
+      const arm = new THREE.Mesh(new THREE.BoxGeometry(0.2,0.4,0.2), cMat);
+      arm.position.set(0.28, h*0.6, 0); arm.castShadow = true;
+      g.add(arm);
+    }
+    const blob = makeShadowBlob(1.1);
+    blob.position.y = 0.012;
+    g.add(blob);
+    g.position.set(LANES[lane],0,-58);
+    scene.add(g);
+    return { mesh:g, z:-58, lane:lane, type:'cactus', checked:false };
+  }
+  function makeBird(lane){
+    const spr = makeEmojiSprite('🦅', 0.9);
+    spr.position.set(LANES[lane], 1.75, -58);
+    scene.add(spr);
+    return { mesh:spr, z:-58, lane:lane, type:'bird', checked:false, baseY:1.75 };
+  }
+
+  function jump(){
+    if (!running) return;
+    if (!physics.jumping){ physics.vy = 0.235; physics.jumping = true; }
+  }
+  function setDuck(on){ if (running) physics.ducking = on; }
+  function moveLane(dir){
+    if (!running) return;
+    laneIndex = Math.max(0, Math.min(2, laneIndex + dir));
+  }
+
+  function startGame(){
+    document.getElementById('overlay').classList.add('hidden');
+    resetGame();
+  }
+  function endGame(){
+    running = false;
+    if (score > state.highScore){ state.highScore = Math.floor(score); saveState(); }
+    document.getElementById('highScore').textContent = state.highScore;
+    setTimeout(function(){
+      const ov = document.getElementById('overlay');
+      document.getElementById('title').textContent = '💥 ¡Perdiste! Puntaje: ' + Math.floor(score);
+      ov.classList.remove('hidden');
+      document.getElementById('playBtn').textContent = '▶️ JUGAR DE NUEVO (Espacio)';
+    }, 350);
+  }
+
+  function update(){
+    if (!threeReady) return;
+    const scrollSpeed = running ? speed : 0.03;
+
+    dashesA.forEach(function(d){ d.position.z += scrollSpeed; if (d.position.z > 6) d.position.z -= TRACK_LEN; });
+    dashesB.forEach(function(d){ d.position.z += scrollSpeed; if (d.position.z > 6) d.position.z -= TRACK_LEN; });
+    rocks.forEach(function(r){
+      r.position.z += scrollSpeed*0.9;
+      if (r.position.z > 6){ r.position.z -= 160; r.position.x = (r.position.x<0?-1:1)*(6+Math.random()*2); }
+    });
+    if (state.selectedMap==='noche') stars.rotation.y += 0.0003;
+
+    // el dino siempre se desliza hacia su carril actual (aunque no este jugando)
+    dinoGroup.position.x += (LANES[laneIndex] - dinoGroup.position.x) * 0.22;
+    // camara sigue un poco el carril para ver bien de frente lo que viene
+    const camTargetX = dinoGroup.position.x * 0.55;
+    camera.position.x += (camTargetX - camera.position.x) * 0.08;
+    camera.lookAt(camera.position.x*0.3, 1.6, -18);
+    // el cielo y las nubes viajan con la camara para que el horizonte nunca se acabe
+    skyDome.position.set(camera.position.x, 0, camera.position.z);
+    clouds.forEach(function(c, i){
+      c.position.z += scrollSpeed*0.15;
+      if (c.position.z - camera.position.z > 40){ c.position.z = camera.position.z - 90 - Math.random()*40; }
+    });
+    // sombra de contacto: sigue al dino en x/z y se desvanece cuando salta
+    if (dinoShadowBlob){
+      dinoShadowBlob.position.x = dinoGroup.position.x;
+      dinoShadowBlob.material.opacity = Math.max(0, 0.55 - (dinoGroup.position.y||0)*0.6);
+    }
+
+    if (!running) return;
+    const d = DINOS.find(function(x){ return x.id===state.selectedDino; });
+
+    physics.vy -= 0.014;
+    physics.y += physics.vy;
+    if (physics.y <= 0){ physics.y = 0; physics.vy = 0; physics.jumping = false; }
+    dinoGroup.position.y = physics.y;
+
+    const targetScale = (physics.ducking && !physics.jumping) ? DUCK_SCALE : 1;
+    dinoGroup.scale.y += (targetScale - dinoGroup.scale.y) * 0.35;
+
+    walkT += speed*2.2;
+    if (dinoGroup.userData.legs){
+      dinoGroup.userData.legs[0].rotation.x = Math.sin(walkT)*0.5;
+      dinoGroup.userData.legs[1].rotation.x = Math.sin(walkT+Math.PI)*0.5;
+    }
+
+    speed = Math.min(speed + 0.00006, 0.5);
+    score += speed*4;
+
+    spawnFrames -= 1;
+    if (spawnFrames <= 0){
+      const lane = Math.floor(Math.random()*3);
+      const spawnBird = score > 35 && Math.random() < 0.35;
+      obstacles.push(spawnBird ? makeBird(lane) : makeCactus(lane));
+      spawnFrames = 58 + Math.floor(Math.random()*48);
+    }
+
+    for (const o of obstacles){
+      o.z += speed;
+      o.mesh.position.z = o.z;
+      if (o.type==='bird') o.mesh.position.y = o.baseY + Math.sin(walkT*1.4)*0.12;
+
+      if (!o.checked && o.z > -0.55 && o.z < 0.55){
+        o.checked = true;
+        const sameLane = o.lane === laneIndex;
+        if (sameLane && !d.ghost){
+          if (o.type==='cactus' && physics.y < JUMP_CLEAR){ endGame(); }
+          if (o.type==='bird' && !physics.ducking){ endGame(); }
+        } else if (sameLane) {
+          // dino fantasma: no choca nunca
+        }
+      }
+    }
+    obstacles = obstacles.filter(function(o){
+      if (o.z > 3){ scene.remove(o.mesh); return false; }
+      return true;
+    });
+  }
+
+  function animate(){
+    requestAnimationFrame(animate);
+    try {
+      update();
+      if (threeReady) renderer.render(scene, camera);
+    } catch(e){ /* evita que un frame roto detenga el loop */ }
+    document.getElementById('score').textContent = Math.floor(score||0);
+  }
+
+  // ================= INPUT =================
+  window.addEventListener('keydown', function(e){
+    if (e.code==='Space' || e.code==='ArrowUp'){
+      e.preventDefault();
+      if (!document.getElementById('overlay').classList.contains('hidden')) startGame();
+      else jump();
+    }
+    if (e.code==='ArrowDown' || e.code==='KeyS'){ e.preventDefault(); setDuck(true); }
+    if (e.code==='ArrowLeft' || e.code==='KeyA'){ moveLane(-1); }
+    if (e.code==='ArrowRight' || e.code==='KeyD'){ moveLane(1); }
+  });
+  window.addEventListener('keyup', function(e){
+    if (e.code==='ArrowDown' || e.code==='KeyS'){ setDuck(false); }
+  });
+
+  // botones en pantalla (funcionan igual con mouse en PC y con dedo en movil)
+  function bindHold(elId, onDown, onUp){
+    const el = document.getElementById(elId);
+    el.addEventListener('pointerdown', function(e){ e.preventDefault(); onDown(); });
+    if (onUp){
+      el.addEventListener('pointerup', function(e){ e.preventDefault(); onUp(); });
+      el.addEventListener('pointerleave', function(e){ onUp(); });
+    }
+  }
+  bindHold('btnJump', jump);
+  bindHold('btnDuck', function(){ setDuck(true); }, function(){ setDuck(false); });
+
+  // gestos de arrastre sobre el area de juego: swipe izq/der = cambiar carril, arriba = saltar, abajo = agachar
+  const gwrap = document.getElementById('gameWrap');
+  let touchStart = null;
+  gwrap.addEventListener('touchstart', function(e){
+    const t = e.touches[0];
+    touchStart = { x:t.clientX, y:t.clientY, t:Date.now() };
+  }, {passive:true});
+  gwrap.addEventListener('touchend', function(e){
+    if (!touchStart) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - touchStart.x;
+    const dy = t.clientY - touchStart.y;
+    const dt = Date.now() - touchStart.t;
+    if (Math.abs(dx) < 24 && Math.abs(dy) < 24 && dt < 300){
+      if (!document.getElementById('overlay').classList.contains('hidden')) { /* deja que los botones del menu manejen el tap */ }
+      else jump();
+    } else if (Math.abs(dx) > Math.abs(dy)){
+      moveLane(dx > 0 ? 1 : -1);
+    } else if (dy > 30){
+      setDuck(true); setTimeout(function(){ setDuck(false); }, 500);
+    } else if (dy < -30){
+      jump();
+    }
+    touchStart = null;
+  }, {passive:true});
+
+  document.getElementById('playBtn').addEventListener('click', startGame);
+
+  // ================= INIT =================
+  try {
+    initThree();
+    loadState().then(function(){ animate(); });
+  } catch(e){
+    const box = document.getElementById('errBox');
+    box.classList.remove('hidden');
+    box.textContent = 'No se pudo iniciar el motor 3D: ' + e.message;
+  }
+})();
+</script>
+</body>
+</html>
