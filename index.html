@@ -2,699 +2,523 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Dino Runner 3D</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>🦖 Dino Runner 3D ULTRA - SAMUEL PDH</title>
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  html, body {
-    background:#1a1a2e; color:#eee; font-family:'Segoe UI', Arial, sans-serif;
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    min-height:100vh; user-select:none; overflow:hidden; touch-action:none;
-  }
-  h1 { margin:10px 0 8px; letter-spacing:2px; text-align:center; font-size:20px; }
-  #gameWrap { position:relative; width:min(920px,98vw); aspect-ratio: 16/9; touch-action:none; }
-  #three-container { width:100%; height:100%; border-radius:10px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,.5); touch-action:none; }
-  canvas { display:block; }
-  #errBox {
-    position:absolute; inset:0; background:#200; color:#f88; font-family:monospace; font-size:12px;
-    padding:14px; overflow:auto; z-index:50; white-space:pre-wrap;
-  }
-  #hud {
-    position:absolute; top:8px; left:0; right:0; display:flex; justify-content:space-between;
-    padding:0 16px; font-weight:bold; font-size:14px; color:#fff; text-shadow:0 1px 4px rgba(0,0,0,.8);
-    pointer-events:none;
-  }
-  #overlay {
-    position:absolute; inset:0; background:rgba(12,12,25,.82); border-radius:10px;
-    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:12px;
-    overflow-y:auto; z-index:10;
-  }
-  .hidden { display:none !important; }
-  .label { font-size:11px; letter-spacing:1px; color:#cde; text-transform:uppercase; margin-top:4px; }
-  .row { display:flex; gap:7px; flex-wrap:wrap; justify-content:center; max-width:480px; }
-  .swatch {
-    width:54px; height:54px; border-radius:10px; border:2px solid rgba(255,255,255,.15);
-    background:rgba(20,20,40,.9); display:flex; flex-direction:column; align-items:center; justify-content:center;
-    cursor:pointer; gap:3px; transition:.15s;
-  }
-  .swatch:hover { transform:translateY(-2px); }
-  .swatch.selected { border-color:#4ade80; box-shadow:0 0 12px rgba(74,222,128,.6); }
-  .swatch span { font-size:8px; color:#ddd; text-align:center; }
-  .dinoIcon { width:22px; height:22px; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:15px; }
-  .mapCard {
-    width:84px; height:46px; border-radius:8px; border:2px solid rgba(255,255,255,.15);
-    cursor:pointer; display:flex; align-items:flex-end; justify-content:center; padding-bottom:4px;
-    font-size:10px; font-weight:bold; color:#222; transition:.15s;
-  }
-  .mapCard:hover { transform:translateY(-2px); }
-  .mapCard.selected { border-color:#4ade80; box-shadow:0 0 12px rgba(74,222,128,.6); }
-  button.play {
-    margin-top:6px; padding:9px 24px; font-size:14px; font-weight:bold; border:none; border-radius:8px;
-    background:#4ade80; color:#0a2; cursor:pointer;
-  }
-  button.play:hover { background:#5eead4; }
-  #title { font-size:18px; font-weight:bold; color:#fff; text-align:center; }
-  #sub { font-size:11px; color:#cde; text-align:center; max-width:440px; }
-  #ghostNote { font-size:10px; color:#c084fc; }
-
-  #touchControls {
-    position:absolute; bottom:14px; left:0; right:0; z-index:20; pointer-events:none;
-  }
-  .ctlBtn {
-    position:absolute; bottom:0; width:78px; height:78px; border-radius:50%;
-    border:2px solid rgba(255,255,255,.4);
-    background:rgba(20,20,40,.5); color:#fff; font-size:15px; font-weight:bold;
-    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
-    touch-action:none; cursor:pointer; backdrop-filter:blur(3px); pointer-events:auto;
-  }
-  .ctlBtn .ico { font-size:24px; }
-  .ctlBtn:active { background:rgba(74,222,128,.6); transform:scale(0.94); }
-  #btnDuck { left:16px; }
-  #btnJump { right:16px; }
-  #vignette {
-    position:absolute; inset:0; pointer-events:none; border-radius:10px;
-    box-shadow: inset 0 0 90px 20px rgba(0,0,0,.45);
-  }
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{background:#050510;color:#eee;font-family:'Segoe UI',system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;min-height:100dvh;user-select:none;overflow:hidden;touch-action:none;position:fixed;inset:0}
+#gameWrap{position:relative;width:100vw;height:100vh;height:100dvh;touch-action:none;overflow:hidden}
+#three-container{width:100%;height:100%;overflow:hidden;touch-action:none;background:#1a1a2e}
+canvas{display:block}
+#hud{position:absolute;top:max(50px,env(safe-area-inset-top));left:60px;right:60px;display:flex;justify-content:space-between;align-items:center;padding:8px 0;z-index:15;pointer-events:none}
+.hudBox{background:rgba(0,0,0,0.5);backdrop-filter:blur(10px);border-radius:20px;padding:6px 14px;display:flex;align-items:center;gap:8px;font-weight:bold;font-size:11px;color:#fff;border:1px solid rgba(255,255,255,0.1)}
+.badge{padding:2px 8px;border-radius:12px;font-size:9px;display:none}
+#specialBadge{background:rgba(200,100,255,0.5);color:#eeddff;display:inline}
+#ghostBadge{background:rgba(136,102,255,0.5);color:#d4bfff}
+#shieldBadge{background:rgba(74,222,128,0.5);color:#bbf7d0}
+#magnetBadge{background:rgba(250,204,21,0.5);color:#fef08a}
+#speedBadge{background:rgba(255,100,100,0.5);color:#ffcccc}
+#jumpBadge{background:rgba(100,200,255,0.5);color:#ccedff}
+#invBadge{background:rgba(255,180,50,0.5);color:#ffeedd}
+#terrorBadge{background:rgba(180,0,0,0.5);color:#ff8888}
+#webBadge{background:rgba(100,100,100,0.5);color:#cccccc}
+#comboText{position:absolute;top:45%;left:50%;transform:translate(-50%,-50%);font-size:28px;font-weight:bold;color:#ffd700;z-index:14;pointer-events:none;opacity:0;transition:all 0.3s}
+#gameOverPanel{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(10,10,35,0.97);border:2px solid rgba(255,100,100,0.5);border-radius:20px;padding:20px 28px;text-align:center;z-index:25;pointer-events:auto;backdrop-filter:blur(15px)}
+#gameOverPanel h2{color:#ff6b6b;font-size:28px;margin-bottom:10px}
+.finalScore{font-size:46px;font-weight:bold;color:#fff;margin:6px 0}
+.recordText{font-size:14px;color:#ffd93d;margin:3px 0}
+.newRecord{font-size:15px;color:#4ade80;margin:6px 0;animation:pulse 0.7s infinite;font-weight:bold}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.7;transform:scale(1.05)}}
+.btnRow{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+button{margin-top:8px;padding:10px 20px;font-size:13px;font-weight:bold;border:none;border-radius:25px;cursor:pointer;background:linear-gradient(135deg,#4ade80,#22c55e);color:#052e16;transition:0.2s}
+button:active{transform:scale(0.95)!important}
+.btnMenu{background:linear-gradient(135deg,#a78bfa,#7c3aed);color:#fff;font-size:12px}
+#overlay{position:absolute;inset:0;background:rgba(5,5,20,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:20px;overflow-y:auto;z-index:20}
+.hidden{display:none!important}
+.label{font-size:9px;letter-spacing:2px;color:#8899bb;text-transform:uppercase;margin-top:4px}
+.row{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;max-width:94vw}
+.swatch{width:42px;height:42px;border-radius:12px;border:2px solid rgba(255,255,255,.1);background:rgba(20,20,40,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:1px;transition:0.2s;touch-action:manipulation}
+.swatch.locked{opacity:0.4;border-color:rgba(255,0,0,0.5);background:rgba(40,10,10,.9)}
+.swatch:active{transform:scale(0.92)}
+.swatch.selected{border-color:#4ade80;box-shadow:0 0 18px rgba(74,222,128,.6)}
+.swatch span{font-size:5px;color:#ccc;text-align:center;pointer-events:none}
+.dinoIcon{width:16px;height:16px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px;pointer-events:none}
+.mapCard{width:65px;height:36px;border-radius:10px;border:2px solid rgba(255,255,255,.1);cursor:pointer;display:flex;align-items:flex-end;justify-content:center;padding-bottom:3px;font-size:7px;font-weight:bold;color:#222;transition:0.2s;touch-action:manipulation}
+.mapCard:active{transform:scale(0.94)}
+.mapCard.selected{border-color:#4ade80;box-shadow:0 0 18px rgba(74,222,128,.6)}
+#title{font-size:20px;font-weight:bold;color:#fff;text-align:center}
+#sub{font-size:8px;color:#8899bb;text-align:center;max-width:420px;line-height:1.5}
+#touchHint{position:absolute;bottom:20px;left:0;right:0;text-align:center;font-size:8px;color:rgba(255,255,255,0.35);z-index:12;pointer-events:none}
+#vignette{position:absolute;inset:0;pointer-events:none;z-index:5;box-shadow:inset 0 0 140px 35px rgba(0,0,0,.55)}
+#damageFlash{position:absolute;inset:0;background:rgba(255,0,0,0.4);z-index:8;pointer-events:none;opacity:0;transition:opacity 0.1s}
+#pauseBtn{position:absolute;top:max(12px,env(safe-area-inset-top));left:12px;z-index:30;pointer-events:auto;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);border:2px solid rgba(255,255,255,0.3);color:#fff;width:40px;height:40px;border-radius:50%;font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;margin:0;transition:0.2s}
+#menuBtn{position:absolute;top:max(12px,env(safe-area-inset-top));right:12px;z-index:30;pointer-events:auto;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);border:2px solid rgba(255,255,255,0.3);color:#fff;width:40px;height:40px;border-radius:50%;font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;margin:0;transition:0.2s}
+#passwordPanel{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(10,10,35,0.98);border:2px solid rgba(200,100,255,0.6);border-radius:20px;padding:20px;text-align:center;z-index:30;pointer-events:auto;backdrop-filter:blur(15px)}
+#passwordPanel h3{color:#c084fc;margin-bottom:12px;font-size:16px}
+#passwordInput{width:120px;padding:10px;border-radius:10px;border:2px solid rgba(255,255,255,0.3);background:rgba(0,0,0,0.5);color:#fff;text-align:center;font-size:20px;letter-spacing:5px;outline:none}
+#passwordMsg{font-size:10px;margin-top:6px;color:#ff6b6b;min-height:16px}
+#clothingPanel{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(10,10,35,0.98);border:2px solid rgba(255,215,0,0.5);border-radius:20px;padding:16px;text-align:center;z-index:28;pointer-events:auto;backdrop-filter:blur(15px);max-height:80vh;overflow-y:auto;min-width:280px}
+#clothingPanel h3{color:#ffd700;margin-bottom:10px;font-size:15px}
+#clothingGrid{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:300px}
+.clothItem{width:55px;height:55px;border-radius:12px;border:2px solid rgba(255,255,255,.1);background:rgba(20,20,40,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:2px;transition:0.2s;touch-action:manipulation}
+.clothItem:active{transform:scale(0.92)}
+.clothItem.selected{border-color:#ffd700;box-shadow:0 0 15px rgba(255,215,0,.5)}
+.clothItem span{font-size:6px;color:#ccc;text-align:center}
+#openClothing{background:linear-gradient(135deg,#ffd700,#f59e0b);color:#78350f;font-size:12px;padding:8px 16px;margin-top:4px}
+#watermark{position:absolute;bottom:10px;left:0;right:0;text-align:center;z-index:13;pointer-events:none}
+#watermark span{background:rgba(0,0,0,0.7);backdrop-filter:blur(5px);color:rgba(255,215,0,0.85);padding:5px 18px;border-radius:15px;font-size:11px;font-weight:bold;letter-spacing:1px;border:1px solid rgba(255,215,0,0.4);text-shadow:0 0 10px rgba(255,215,0,0.5)}
+#pauseOverlay{position:absolute;inset:0;background:rgba(0,0,0,0.75);display:flex;align-items:center;justify-content:center;z-index:22;backdrop-filter:blur(5px)}
+#pauseOverlay h2{color:#ffd700;font-size:45px;text-shadow:0 0 25px rgba(255,215,0,0.7);animation:pulse 1s infinite}
+@media(max-width:767px){#touchHint{display:block}.swatch{width:40px;height:40px}.mapCard{width:60px;height:34px}#watermark span{font-size:9px;padding:4px 14px}}
+@media(min-width:768px){#gameWrap{width:min(960px,100vw);height:min(540px,56.25vw);border-radius:16px;overflow:hidden}#touchHint{display:none}}
 </style>
 </head>
 <body>
-<h1>🦖 DINO RUNNER 3D</h1>
 <div id="gameWrap">
-  <div id="three-container"></div>
-  <div id="errBox" class="hidden"></div>
-  <div id="hud">
-    <div id="mapName">Día</div>
-    <div><span id="score">0</span> &nbsp;|&nbsp; Récord: <span id="highScore">0</span></div>
-  </div>
-  <div id="vignette"></div>
-  <div id="touchControls">
-    <div class="ctlBtn" id="btnDuck"><span class="ico">⬇️</span>Agachar</div>
-    <div class="ctlBtn" id="btnJump"><span class="ico">⬆️</span>Saltar</div>
-  </div>
-  <div id="overlay">
-    <div id="title">Elige tu dino</div>
-    <div class="row" id="dinoRow"></div>
-    <div id="ghostNote" class="hidden">👻 El Dino Fantasma es inmortal: nunca choca ni pierde.</div>
-    <div class="label">Ropa / Accesorios</div>
-    <div class="row" id="accRow"></div>
-    <div class="label">Elige el mapa</div>
-    <div class="row" id="mapRow"></div>
-    <button class="play" id="playBtn">▶️ JUGAR (Espacio)</button>
-    <div id="sub">Carriles: ← → / A D / arrastra o botones. Salta: Espacio / ↑. Agáchate: ↓ / S. ¡Infinito!</div>
-  </div>
+<div id="three-container"></div>
+<button id="pauseBtn" title="Pausa">⏸️</button>
+<button id="menuBtn" title="Volver al menú">🏠</button>
+<div id="hud">
+<div class="hudBox"><span id="livesDisplay">❤️❤️❤️</span><span id="mapName">🌅 Día</span><span id="specialBadge" class="badge">⚡</span><span id="ghostBadge" class="badge">👻</span><span id="shieldBadge" class="badge">🛡️</span><span id="magnetBadge" class="badge">🧲</span><span id="speedBadge" class="badge">⚡</span><span id="jumpBadge" class="badge">🦘</span><span id="invBadge" class="badge">🌟</span><span id="terrorBadge" class="badge">💀</span><span id="webBadge" class="badge">🕸️</span></div>
+<div class="hudBox"><span>🪙<span id="coinCount">0</span></span><span>⭐<span id="score">0</span></span><span>🏆<span id="highScore">0</span></span></div>
 </div>
-
+<div id="comboText"></div>
+<div id="touchHint">⬆️ Arriba=Saltar | ↔️ Lados=Carril | ⬇️ Mantén=Agachar | 2✌️ Poder</div>
+<div id="damageFlash"></div>
+<div id="watermark"><span>🎮 CREADOR: SAMUEL PDH</span></div>
+<div id="pauseOverlay" class="hidden"><h2>⏸️ PAUSA</h2></div>
+<div id="gameOverPanel" class="hidden">
+<h2>💥 ¡Game Over!</h2>
+<div class="finalScore" id="finalScore">0</div>
+<div class="recordText">🏆 Récord: <span id="finalRecord">0</span></div>
+<div style="color:#fbbf24;font-size:13px">🪙 <span id="finalCoins">0</span></div>
+<div id="newRecordBadge" class="newRecord hidden">🎉 ¡NUEVO RÉCORD!</div>
+<div class="btnRow">
+<button id="gameOverRestart">▶️ JUGAR OTRA VEZ</button>
+<button id="gameOverMenu" class="btnMenu">↩️ MENÚ</button>
+</div>
+</div>
+<div id="vignette"></div>
+<div id="passwordPanel" class="hidden">
+<h3>🔒 DINOS BLOQUEADOS</h3>
+<p style="font-size:10px;color:#aaa;margin-bottom:8px">Ingresa la contraseña secreta</p>
+<input type="password" id="passwordInput" placeholder="•••" maxlength="6">
+<div id="passwordMsg"></div>
+<div class="btnRow" style="margin-top:10px">
+<button id="passwordSubmit" style="font-size:12px;padding:8px 16px">🔓 DESBLOQUEAR</button>
+<button id="passwordCancel" class="btnMenu" style="font-size:12px;padding:8px 16px">Cancelar</button>
+</div>
+</div>
+<div id="clothingPanel" class="hidden">
+<h3>👚 ROPA Y ACCESORIOS</h3>
+<div id="clothingGrid"></div>
+<button id="closeClothing" class="btnMenu" style="margin-top:8px;font-size:12px;padding:8px 16px">✅ LISTO</button>
+</div>
+<div id="overlay">
+<div id="title">🦖 DINO RUNNER ULTRA</div>
+<div class="row" id="dinoRow"></div>
+<div id="ghostNote" style="font-size:8px;color:#ffd700;text-align:center"></div>
+<button id="openClothing">👚 ROPA Y ACCESORIOS</button>
+<div class="label">🌍 MAPA</div>
+<div class="row" id="mapRow"></div>
+<button id="playBtn" style="margin-top:4px;font-size:14px">▶️ JUGAR</button>
+<div id="sub">🎮 PC: ←→/AD • Espacio/↑=Saltar • ↓/S=Agachar • E=Poder<br>📱 Móvil: ⬆️=Saltar • ↔️=Carril • ⬇️=Agachar • 2✌️=Poder</div>
+</div>
+</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-window.addEventListener('error', function(e){
-  const box = document.getElementById('errBox');
-  box.classList.remove('hidden');
-  box.textContent = 'Error: ' + e.message + '\n' + (e.filename||'') + ':' + (e.lineno||'');
-});
-
 (function(){
-  // ================= DATA =================
-  const DINOS = [
-    { id:'verde',    name:'Rex Verde',  color:0x2e7d32, ghost:false },
-    { id:'azul',     name:'Rex Azul',   color:0x1565c0, ghost:false },
-    { id:'rojo',     name:'Rex Rojo',   color:0xc62828, ghost:false },
-    { id:'dorado',   name:'Rex Dorado', color:0xf9a825, ghost:false },
-    { id:'fantasma', name:'Dino Fantasma', color:0xd8c8ff, ghost:true },
-  ];
-  const ACCESSORIES = [
-    { id:'ninguno',  name:'Ninguno',  emoji:'' },
-    { id:'gorra',    name:'Gorra',    emoji:'🧢' },
-    { id:'lentes',   name:'Lentes',   emoji:'🕶️' },
-    { id:'corona',   name:'Corona',   emoji:'👑' },
-    { id:'bufanda',  name:'Bufanda',  emoji:'🧣' },
-    { id:'mono',     name:'Moño',     emoji:'🎀' },
-    { id:'fiesta',   name:'Fiesta',   emoji:'🎉' },
-  ];
-  const MAPS = {
-    dia:   { name:'Día',   sky:0x8ec9ff, ground:0xd8c48a, fogNear:16, fogFar:65, ambient:0xffffff, ambientI:0.95, sun:0xffffff, sunI:1.0, stars:false },
-    tarde: { name:'Tarde', sky:0xff9a5a, ground:0xc98f5c, fogNear:13, fogFar:55, ambient:0xffcf9e, ambientI:0.8, sun:0xffb366, sunI:0.9, stars:false },
-    noche: { name:'Noche', sky:0x0b1030, ground:0x33334a, fogNear:10, fogFar:48, ambient:0x5566aa, ambientI:0.55, sun:0x8899ff, sunI:0.55, stars:true },
-  };
-  const LANES = [-2.1, 0, 2.1];
+'use strict';
+const $=id=>document.getElementById(id);
+const STORAGE_KEY='dinoultra_v16';
+const UNLOCK_KEY='dinoultra_unlocked';
 
-  let state = { selectedDino:'verde', selectedMap:'dia', selectedAccessory:'ninguno', highScore:0 };
+function loadData(k,f){try{let r=localStorage.getItem(k);return r?JSON.parse(r):f}catch(e){return f}}
+function saveData(k,d){try{localStorage.setItem(k,JSON.stringify(d))}catch(e){}}
 
-  // ================= MENU UI (no depende de Three.js) =================
-  const dinoRow = document.getElementById('dinoRow');
-  const mapRow = document.getElementById('mapRow');
-  const accRow = document.getElementById('accRow');
-  const ghostNote = document.getElementById('ghostNote');
+let audioCtx=null;
+function initAudio(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume()}
+function beep(f,d,t,v){if(!audioCtx)return;try{let o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=t||'square';o.frequency.setValueAtTime(f,audioCtx.currentTime);g.gain.setValueAtTime(v||0.06,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+d);o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+d)}catch(e){}}
+function sfxJump(){beep(400,0.12);beep(600,0.08,'sine',0.04)}
+function sfxCoin(){beep(900,0.06,'sine',0.05);beep(1400,0.04,'sine',0.03)}
+function sfxPowerUp(){beep(500,0.08,'triangle');beep(700,0.06,'triangle',0.05)}
+function sfxCrash(){beep(70,0.3,'sawtooth',0.1)}
+function sfxRecord(){beep(600,0.1,'sine',0.06);beep(800,0.1,'sine',0.05)}
+function sfxPortal(){beep(300,0.15,'sine',0.05);beep(500,0.1,'sine',0.04)}
+function sfxSpecial(){beep(200,0.2,'triangle',0.07);beep(400,0.15,'triangle',0.06)}
+function sfxTerror(){beep(40,0.5,'sawtooth',0.15)}
+function sfxUnlock(){beep(800,0.1,'sine',0.06);beep(1000,0.1,'sine',0.05);beep(1200,0.15,'sine',0.04)}
 
-  function renderMenus(){
-    dinoRow.innerHTML = '';
-    DINOS.forEach(d=>{
-      const el = document.createElement('div');
-      el.className = 'swatch' + (state.selectedDino===d.id ? ' selected':'');
-      const hex = '#'+d.color.toString(16).padStart(6,'0');
-      el.innerHTML = '<div class="dinoIcon" style="background:'+hex+'"></div><span>'+d.name+'</span>';
-      el.addEventListener('click', function(){
-        state.selectedDino = d.id;
-        saveState();
-        renderMenus();
-        safeBuildDino();
-      });
-      dinoRow.appendChild(el);
-    });
-    ghostNote.classList.toggle('hidden', state.selectedDino !== 'fantasma');
+const SECRET_PASSWORD='777';
+let unlockedDinos=loadData(UNLOCK_KEY,[]);
+let selectedLockedDino=null;
+let paused=false;
 
-    accRow.innerHTML = '';
-    ACCESSORIES.forEach(a=>{
-      const el = document.createElement('div');
-      el.className = 'swatch' + (state.selectedAccessory===a.id ? ' selected':'');
-      el.innerHTML = '<div class="dinoIcon">'+(a.emoji||'✖️')+'</div><span>'+a.name+'</span>';
-      el.addEventListener('click', function(){
-        state.selectedAccessory = a.id;
-        saveState();
-        renderMenus();
-        safeBuildDino();
-      });
-      accRow.appendChild(el);
-    });
+const DINOS=[
+{id:'verde',name:'Rex Veloz',color:0x2e7d32,ghost:false,special:'speed',specialName:'Velocidad',specialEmoji:'⚡',locked:false},
+{id:'azul',name:'Rex Saltarín',color:0x1565c0,ghost:false,special:'jump',specialName:'Super Salto',specialEmoji:'🦘',locked:false},
+{id:'rojo',name:'Rex Escudo',color:0xc62828,ghost:false,special:'shield',specialName:'Escudo',specialEmoji:'🛡️',locked:false},
+{id:'dorado',name:'Rex Imán',color:0xf9a825,ghost:false,special:'magnet',specialName:'Imán',specialEmoji:'🧲',locked:false},
+{id:'negro',name:'Rex Sombra',color:0x1a1a1a,ghost:false,special:'invincible',specialName:'Invencible',specialEmoji:'🌟',locked:false},
+{id:'rosa',name:'Rex Combo',color:0xe91e8a,ghost:false,special:'combo',specialName:'Combo',specialEmoji:'🔥',locked:false},
+{id:'hielo',name:'Rex Hielo',color:0xb3e5fc,ghost:false,special:'freeze',specialName:'Congelar',specialEmoji:'❄️',locked:false},
+{id:'fantasma',name:'Fantasma',color:0xd8c8ff,ghost:true,special:'ghost',specialName:'Eterno',specialEmoji:'👻',locked:true},
+{id:'sangriento',name:'Rex Sangriento',color:0x8b0000,ghost:false,special:'terror',specialName:'Terror',specialEmoji:'🩸',locked:true},
+{id:'arana',name:'Rex Araña',color:0x0a0a0a,ghost:false,special:'web',specialName:'Telaraña',specialEmoji:'🕷️',locked:true}
+];
+DINOS.forEach(d=>{if(unlockedDinos.includes(d.id))d.locked=false});
 
-    mapRow.innerHTML = '';
-    Object.keys(MAPS).forEach(function(key){
-      const m = MAPS[key];
-      const el = document.createElement('div');
-      el.className = 'mapCard' + (state.selectedMap===key ? ' selected':'');
-      const hex = '#'+m.sky.toString(16).padStart(6,'0');
-      el.style.background = hex;
-      el.style.color = key==='noche' ? '#fff' : '#333';
-      el.textContent = m.name;
-      el.addEventListener('click', function(){
-        state.selectedMap = key;
-        saveState();
-        renderMenus();
-        safeApplyMapVisuals();
-      });
-      mapRow.appendChild(el);
-    });
+const ACCESSORIES=[
+{id:'ninguno',name:'Ninguno',emoji:''},{id:'gorra',name:'Gorra',emoji:'🧢'},{id:'lentes',name:'Lentes Cool',emoji:'😎'},
+{id:'corona',name:'Corona Rey',emoji:'👑'},{id:'bufanda',name:'Bufanda',emoji:'🧣'},{id:'moño',name:'Moño Rosa',emoji:'🎀'},
+{id:'fiesta',name:'Fiesta',emoji:'🎉'},{id:'sombrero',name:'Elegancia',emoji:'🎩'},{id:'capa',name:'Capa Heroica',emoji:'🦸'},
+{id:'audifonos',name:'DJ Dino',emoji:'🎧'},{id:'deportivo',name:'Deportivo',emoji:'🏀'},{id:'vaquero',name:'Vaquero',emoji:'🤠'},
+{id:'camisa_roja',name:'Camisa Roja',emoji:'👕'},{id:'camisa_azul',name:'Camisa Azul',emoji:'👔'},
+{id:'alas_angel',name:'Alas Ángel',emoji:'😇'},{id:'alas_demonio',name:'Alas Demonio',emoji:'😈'},
+{id:'cuernos',name:'Cuernos',emoji:'👿'},{id:'mascara',name:'Máscara',emoji:'🎭'},
+{id:'gafas_sol',name:'Gafas Sol',emoji:'🕶️'},{id:'collar',name:'Collar Oro',emoji:'📿'}
+];
 
-    document.getElementById('mapName').textContent = MAPS[state.selectedMap].name;
-    document.getElementById('highScore').textContent = state.highScore;
-  }
-  renderMenus(); // UI funcional desde ya, aunque Three.js aun no cargue
+const MAPS={
+dia:{name:'🌅 Día',sky:0x87ceeb,ground:0xc8b87c,fogNear:20,fogFar:85,ambientI:0.95,sunI:1.1,sunCol:0xfff5e6,stars:false},
+tarde:{name:'🌇 Atardecer',sky:0xff7b42,ground:0xb8845c,fogNear:15,fogFar:68,ambientI:0.8,sunI:0.95,sunCol:0xffb380,stars:false},
+noche:{name:'🌙 Noche',sky:0x0a0e2a,ground:0x2a2a3e,fogNear:10,fogFar:52,ambientI:0.5,sunI:0.5,sunCol:0x8899ff,stars:true},
+desierto:{name:'🏜️ Desierto',sky:0xf4c882,ground:0xe0b060,fogNear:22,fogFar:90,ambientI:1.0,sunI:1.2,sunCol:0xffe0a0,stars:false},
+invierno:{name:'❄️ Invierno',sky:0xdce8f0,ground:0xe8e8f0,fogNear:12,fogFar:58,ambientI:0.85,sunI:0.9,sunCol:0xd0e0ff,stars:false},
+espacio:{name:'🌌 Espacio',sky:0x0a0020,ground:0x1a0a30,fogNear:8,fogFar:48,ambientI:0.4,sunI:0.45,sunCol:0x6644cc,stars:true}
+};
+const MAP_KEYS=['dia','tarde','noche','desierto','invierno','espacio'];
+const LANES=[-2.1,0,2.1];
 
-  async function loadState(){
-    try {
-      const r = await window.storage.get('dino-game-save-3d');
-      if (r && r.value) state = Object.assign(state, JSON.parse(r.value));
-    } catch(e) {}
-    renderMenus();
-    safeApplyMapVisuals();
-    safeBuildDino();
-  }
-  async function saveState(){
-    try { await window.storage.set('dino-game-save-3d', JSON.stringify(state)); }
-    catch(e) { console.error('No se pudo guardar', e); }
-  }
+let state=loadData(STORAGE_KEY,{selectedDino:'verde',selectedMap:'dia',selectedAccessory:'ninguno',highScore:0,totalCoins:0});
 
-  // ================= THREE.JS SETUP =================
-  let threeReady = false;
-  let scene, camera, renderer, ambient, sun, groundMat, stars, dashesA, dashesB, rocks, TRACK_LEN;
-  let skyDome, clouds, moonSprite;
-  let dinoGroup = null;
+let scene,camera,renderer,ambient,sun,groundMat,stars,skyDome,clouds=[],moonSprite,dinoGroup,dinoShadowBlob;
+let obstacles=[],coins=[],powerUps=[],particles=[],portals=[],dashesA=[],dashesB=[],rocks=[];
+let TRACK_LEN=220,threeReady=false;
+let comboTimer=0,comboCount=0,lastPortalScore=0,lastFlyingScore=0,lastLaneMove=0;
 
-  function makeCloudSprite(){
-    const cnv = document.createElement('canvas');
-    cnv.width = 128; cnv.height = 64;
-    const c = cnv.getContext('2d');
-    c.filter = 'blur(6px)';
-    c.fillStyle = 'rgba(255,255,255,0.9)';
-    c.beginPath();
-    c.ellipse(45,34,32,16,0,0,Math.PI*2);
-    c.ellipse(75,30,26,14,0,0,Math.PI*2);
-    c.ellipse(90,38,22,13,0,0,Math.PI*2);
-    c.fill();
-    const tex = new THREE.CanvasTexture(cnv);
-    const mat = new THREE.SpriteMaterial({ map:tex, transparent:true, depthWrite:false, fog:false });
-    return new THREE.Sprite(mat);
-  }
-  function makeGlowSprite(hex, size){
-    const cnv = document.createElement('canvas');
-    cnv.width = 128; cnv.height = 128;
-    const c = cnv.getContext('2d');
-    const g = c.createRadialGradient(64,64,4,64,64,64);
-    const hexStr = '#'+hex.toString(16).padStart(6,'0');
-    g.addColorStop(0, hexStr);
-    g.addColorStop(0.35, hexStr);
-    g.addColorStop(1, 'rgba(0,0,0,0)');
-    c.fillStyle = g;
-    c.fillRect(0,0,128,128);
-    const tex = new THREE.CanvasTexture(cnv);
-    const mat = new THREE.SpriteMaterial({ map:tex, transparent:true, depthWrite:false, fog:false });
-    const spr = new THREE.Sprite(mat);
-    spr.scale.set(size,size,1);
-    return spr;
-  }
-  function makeShadowBlob(scale){
-    const cnv = document.createElement('canvas');
-    cnv.width = 64; cnv.height = 64;
-    const c = cnv.getContext('2d');
-    const g = c.createRadialGradient(32,32,2,32,32,30);
-    g.addColorStop(0,'rgba(0,0,0,0.5)');
-    g.addColorStop(1,'rgba(0,0,0,0)');
-    c.fillStyle = g; c.fillRect(0,0,64,64);
-    const tex = new THREE.CanvasTexture(cnv);
-    const mat = new THREE.MeshBasicMaterial({ map:tex, transparent:true, depthWrite:false });
-    const geo = new THREE.PlaneGeometry(scale, scale);
-    const mesh = new THREE.Mesh(geo, mat);
-    mesh.rotation.x = -Math.PI/2;
-    return mesh;
-  }
+let gameState={
+laneIndex:1,vy:0,jumping:false,ducking:false,y:0,speed:0.14,score:0,coins:0,lives:3,
+running:false,spawnTimer:50,walkT:0,
+hasShield:false,shieldTimer:0,hasMagnet:false,magnetTimer:0,
+hasSpeed:false,speedTimer:0,hasSuperJump:false,superJumpTimer:0,
+hasInvincible:false,invincibleTimer:0,hasFreeze:false,freezeTimer:0,
+hasTerror:false,terrorTimer:0,hasWeb:false,webTimer:0,
+isGhost:false,specialReady:true,specialCooldown:0
+};
 
-  function initThree(){
-    const container = document.getElementById('three-container');
-    scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(55, container.clientWidth/container.clientHeight, 0.1, 300);
-    camera.position.set(0, 4.6, 9.4);
+function makeEmoji(emoji,size){let c=document.createElement('canvas');c.width=128;c.height=128;let x=c.getContext('2d');x.font='96px serif';x.textAlign='center';x.textBaseline='middle';x.fillText(emoji,64,70);let s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true}));s.scale.set(size,size,1);return s}
+function makeCloud(){let c=document.createElement('canvas');c.width=128;c.height=64;let x=c.getContext('2d');x.filter='blur(6px)';x.fillStyle='rgba(255,255,255,0.8)';x.beginPath();x.ellipse(40,30,28,14,0,0,Math.PI*2);x.ellipse(70,28,24,12,0,0,Math.PI*2);x.ellipse(85,34,20,11,0,0,Math.PI*2);x.fill();return new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthWrite:false,fog:false}))}
+function createParticles(pos,color,count=15){for(let i=0;i<count;i++){let g=new THREE.SphereGeometry(0.06,4,4);let m=new THREE.Mesh(g,new THREE.MeshBasicMaterial({color}));m.position.copy(pos);m.userData={vel:new THREE.Vector3((Math.random()-0.5)*3,Math.random()*3+1,(Math.random()-0.5)*3),life:0.6+Math.random()*0.5};scene.add(m);particles.push(m)}}
 
-    renderer = new THREE.WebGLRenderer({ antialias:true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
-    renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.shadowMap.enabled = true;
-    container.appendChild(renderer.domElement);
+function showPasswordPanel(dinoId){selectedLockedDino=dinoId;$('passwordInput').value='';$('passwordMsg').textContent='';$('passwordPanel').classList.remove('hidden');$('passwordInput').focus()}
+function hidePasswordPanel(){$('passwordPanel').classList.add('hidden');selectedLockedDino=null}
+function submitPassword(){let input=$('passwordInput').value.trim();if(input===SECRET_PASSWORD){if(selectedLockedDino&&!unlockedDinos.includes(selectedLockedDino)){unlockedDinos.push(selectedLockedDino);saveData(UNLOCK_KEY,unlockedDinos);DINOS.forEach(d=>{if(unlockedDinos.includes(d.id))d.locked=false});sfxUnlock();$('passwordMsg').textContent='✅ ¡Desbloqueado!';$('passwordMsg').style.color='#4ade80';state.selectedDino=selectedLockedDino;saveData(STORAGE_KEY,state);setTimeout(()=>{hidePasswordPanel();renderMenus();if(threeReady)buildDino()},600)}}else{$('passwordMsg').textContent='❌ Contraseña incorrecta';$('passwordMsg').style.color='#ff6b6b';$('passwordInput').value=''}}
 
-    window.addEventListener('resize', function(){
-      camera.aspect = container.clientWidth/container.clientHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(container.clientWidth, container.clientHeight);
-    });
+function showClothingPanel(){$('clothingPanel').classList.remove('hidden');let grid=$('clothingGrid');grid.innerHTML='';ACCESSORIES.forEach(a=>{let el=document.createElement('div');el.className='clothItem'+(state.selectedAccessory===a.id?' selected':'');el.innerHTML='<div style="font-size:22px">'+(a.emoji||'✖️')+'</div><span>'+a.name+'</span>';el.onclick=function(e){e.stopPropagation();state.selectedAccessory=a.id;saveData(STORAGE_KEY,state);showClothingPanel();if(threeReady)buildDino()};grid.appendChild(el)})}
+function hideClothingPanel(){$('clothingPanel').classList.add('hidden');renderMenus()}
 
-    ambient = new THREE.HemisphereLight(0x8ec9ff, 0xd8c48a, 0.9);
-    scene.add(ambient);
-    sun = new THREE.DirectionalLight(0xffffff, 1.15);
-    sun.position.set(-6, 14, 6);
-    sun.castShadow = true;
-    sun.shadow.mapSize.set(2048,2048);
-    sun.shadow.camera.near = 1;
-    sun.shadow.camera.far = 40;
-    sun.shadow.camera.left = -12; sun.shadow.camera.right = 12;
-    sun.shadow.camera.top = 12; sun.shadow.camera.bottom = -12;
-    sun.shadow.bias = -0.002;
-    scene.add(sun);
+function togglePause(){if(!gameState.running)return;paused=!paused;if(paused){$('pauseOverlay').classList.remove('hidden');$('pauseBtn').textContent='▶️'}else{$('pauseOverlay').classList.add('hidden');$('pauseBtn').textContent='⏸️'}}
 
-    // cielo degradado (skydome) en vez de color plano
-    function makeSkyTexture(topHex, bottomHex){
-      const cnv = document.createElement('canvas');
-      cnv.width = 2; cnv.height = 256;
-      const ctx2 = cnv.getContext('2d');
-      const g = ctx2.createLinearGradient(0,0,0,256);
-      g.addColorStop(0, topHex); g.addColorStop(1, bottomHex);
-      ctx2.fillStyle = g; ctx2.fillRect(0,0,2,256);
-      const tex = new THREE.CanvasTexture(cnv);
-      tex.needsUpdate = true;
-      return tex;
-    }
-    const skyGeo = new THREE.SphereGeometry(140, 24, 16);
-    const skyMat = new THREE.MeshBasicMaterial({ map: makeSkyTexture('#8ec9ff','#eaf7ff'), side: THREE.BackSide, fog:false });
-    skyDome = new THREE.Mesh(skyGeo, skyMat);
-    scene.add(skyDome);
+function initThree(){
+let ct=$('three-container');
+scene=new THREE.Scene();
+scene.background=new THREE.Color(0x1a1a2e);
+camera=new THREE.PerspectiveCamera(65,ct.clientWidth/ct.clientHeight,0.1,300);
+camera.position.set(0,3.2,6.5);
+camera.lookAt(0,1.2,-10);
+renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+renderer.setSize(ct.clientWidth,ct.clientHeight);
+renderer.shadowMap.enabled=true;
+ct.appendChild(renderer.domElement);
+window.addEventListener('resize',()=>{camera.aspect=ct.clientWidth/ct.clientHeight;camera.updateProjectionMatrix();renderer.setSize(ct.clientWidth,ct.clientHeight)});
+ambient=new THREE.AmbientLight(0xffffff,0.7);scene.add(ambient);
+sun=new THREE.DirectionalLight(0xffffff,1.0);sun.position.set(-8,16,8);sun.castShadow=true;
+sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.near=1;sun.shadow.camera.far=45;
+sun.shadow.camera.left=-14;sun.shadow.camera.right=14;sun.shadow.camera.top=14;sun.shadow.camera.bottom=-14;scene.add(sun);
+skyDome=new THREE.Mesh(new THREE.SphereGeometry(150,24,16),new THREE.MeshBasicMaterial({color:0x8ec9ff,side:THREE.BackSide,fog:false}));scene.add(skyDome);
+for(let i=0;i<8;i++){let s=makeCloud();s.position.set((Math.random()-0.5)*60,14+Math.random()*10,-15-Math.random()*85);s.scale.set(7+Math.random()*6,3+Math.random()*2,1);scene.add(s);clouds.push(s)}
+let mCnv=document.createElement('canvas');mCnv.width=128;mCnv.height=128;let mC=mCnv.getContext('2d'),mg=mC.createRadialGradient(64,64,4,64,64,64);mg.addColorStop(0,'#fff6d8');mg.addColorStop(0.3,'#fff6d8');mg.addColorStop(1,'rgba(0,0,0,0)');mC.fillStyle=mg;mC.fillRect(0,0,128,128);moonSprite=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(mCnv),transparent:true,depthWrite:false,fog:false}));moonSprite.scale.set(5,5,1);moonSprite.position.set(14,22,-60);scene.add(moonSprite);
+let gg=new THREE.PlaneGeometry(22,320);groundMat=new THREE.MeshStandardMaterial({color:0xd8c48a,roughness:0.8});let gnd=new THREE.Mesh(gg,groundMat);gnd.rotation.x=-Math.PI/2;gnd.position.set(0,-0.05,-115);gnd.receiveShadow=true;scene.add(gnd);
+let dc=55,ds=4;TRACK_LEN=dc*ds;let dg=new THREE.BoxGeometry(0.14,0.02,1.2),dm=new THREE.MeshStandardMaterial({color:0x5a4632});
+for(let i=0;i<dc;i++){let a=new THREE.Mesh(dg,dm);a.position.set(-1.05,0.015,-6-i*ds);a.receiveShadow=true;scene.add(a);dashesA.push(a);let b=new THREE.Mesh(dg,dm);b.position.set(1.05,0.015,-6-i*ds-ds/2);b.receiveShadow=true;scene.add(b);dashesB.push(b)}
+let rg=new THREE.DodecahedronGeometry(0.45,0),rm=new THREE.MeshStandardMaterial({color:0x8a7a5a});
+for(let i=0;i<20;i++){let r=new THREE.Mesh(rg,rm);r.position.set((i%2===0?-1:1)*(5.5+Math.random()*2.5),0.35,-6-i*10-Math.random()*7);r.rotation.set(Math.random(),Math.random(),Math.random());r.castShadow=true;r.receiveShadow=true;scene.add(r);rocks.push(r)}
+let sg=new THREE.BufferGeometry(),sp=new Float32Array(200*3);
+for(let i=0;i<200;i++){sp[i*3]=(Math.random()-0.5)*80;sp[i*3+1]=8+Math.random()*25;sp[i*3+2]=-Math.random()*120}
+sg.setAttribute('position',new THREE.BufferAttribute(sp,3));stars=new THREE.Points(sg,new THREE.PointsMaterial({color:0xffffff,size:0.3}));scene.add(stars);
+let sc=document.createElement('canvas');sc.width=64;sc.height=64;let sx=sc.getContext('2d'),sg2=sx.createRadialGradient(32,32,2,32,32,30);sg2.addColorStop(0,'rgba(0,0,0,0.5)');sg2.addColorStop(1,'rgba(0,0,0,0)');sx.fillStyle=sg2;sx.fillRect(0,0,64,64);
+dinoShadowBlob=new THREE.Mesh(new THREE.PlaneGeometry(1.4,1.4),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(sc),transparent:true,depthWrite:false}));dinoShadowBlob.rotation.x=-Math.PI/2;dinoShadowBlob.position.set(0,0.015,0);scene.add(dinoShadowBlob);
+dinoGroup=new THREE.Group();scene.add(dinoGroup);
+threeReady=true;applyMap();buildDino();
+}
 
-    // nubes (sprites) para dia/tarde
-    clouds = [];
-    for (let i=0;i<7;i++){
-      const spr = makeCloudSprite();
-      spr.position.set((Math.random()-0.5)*60, 14+Math.random()*10, -20-Math.random()*90);
-      spr.scale.set(9+Math.random()*6, 4+Math.random()*2, 1);
-      scene.add(spr); clouds.push(spr);
-    }
-    // luna para modo noche
-    moonSprite = makeGlowSprite(0xfff6d8, 4.5);
-    moonSprite.position.set(14, 20, -60);
-    scene.add(moonSprite);
+function applyMap(){if(!threeReady)return;let m=MAPS[state.selectedMap];scene.fog=new THREE.Fog(m.sky,m.fogNear,m.fogFar);groundMat.color.setHex(m.ground);skyDome.material.color.setHex(m.sky);ambient.intensity=m.ambientI;sun.intensity=m.sunI;sun.color.setHex(m.sunCol);stars.visible=m.stars;moonSprite.visible=m.stars;clouds.forEach(c=>c.visible=!m.stars);$('mapName').textContent=m.name}
 
-    const groundGeo = new THREE.PlaneGeometry(20, 260);
-    groundMat = new THREE.MeshStandardMaterial({ color:0xd8c48a });
-    const ground = new THREE.Mesh(groundGeo, groundMat);
-    ground.rotation.x = -Math.PI/2;
-    ground.position.set(0,0,-90);
-    ground.receiveShadow = true;
-    scene.add(ground);
+function buildDino(){
+if(!threeReady)return;
+while(dinoGroup.children.length)dinoGroup.remove(dinoGroup.children[0]);
+let d=DINOS.find(x=>x.id===state.selectedDino);
+if(!d)return;
+let mo={color:d.color,roughness:0.35,metalness:0.2};
+if(d.ghost){mo.transparent=true;mo.opacity=0.45;mo.emissive=0x8866ff;mo.emissiveIntensity=0.5;mo.metalness=0}
+if(d.id==='sangriento'){mo.emissive=0x330000;mo.emissiveIntensity=0.6;mo.roughness=0.15;mo.metalness=0.3}
+if(d.id==='arana'){mo.emissive=0x111111;mo.emissiveIntensity=0.4;mo.roughness=0.1;mo.metalness=0.4}
+let mat=new THREE.MeshStandardMaterial(mo);
 
-    // lineas divisorias de los 3 carriles (2 lineas, en x=-1.05 y x=1.05)
-    const DASH_COUNT = 40, DASH_SPACING = 5;
-    TRACK_LEN = DASH_COUNT*DASH_SPACING;
-    const dashGeo = new THREE.BoxGeometry(0.16, 0.02, 1.3);
-    const dashMat = new THREE.MeshStandardMaterial({ color:0x5a4632 });
-    dashesA = []; dashesB = [];
-    for (let i=0;i<DASH_COUNT;i++){
-      const mA = new THREE.Mesh(dashGeo, dashMat);
-      mA.position.set(-1.05, 0.011, -10 - i*DASH_SPACING);
-      scene.add(mA); dashesA.push(mA);
-      const mB = new THREE.Mesh(dashGeo, dashMat);
-      mB.position.set(1.05, 0.011, -10 - i*DASH_SPACING - DASH_SPACING/2);
-      scene.add(mB); dashesB.push(mB);
-    }
+let body=new THREE.Mesh(new THREE.BoxGeometry(0.85,0.75,1.3),mat);body.position.set(0,0.85,0);body.castShadow=true;
+let head=new THREE.Mesh(new THREE.BoxGeometry(0.55,0.48,0.52),mat);head.position.set(0,1.45,0.72);head.castShadow=true;
+let snout=new THREE.Mesh(new THREE.BoxGeometry(0.32,0.25,0.32),mat);snout.position.set(0,1.32,1.08);snout.castShadow=true;
+let tail=new THREE.Mesh(new THREE.BoxGeometry(0.3,0.28,0.75),mat);tail.position.set(0,0.8,-0.9);tail.rotation.x=0.2;tail.castShadow=true;
+let lg=new THREE.BoxGeometry(0.28,0.5,0.3);
+let ll=new THREE.Mesh(lg,mat);ll.position.set(-0.26,0.25,0.1);ll.castShadow=true;
+let lr=new THREE.Mesh(lg,mat);lr.position.set(0.26,0.25,-0.08);lr.castShadow=true;
+let eyeMat=new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xffffff,emissiveIntensity:0.5});
+let eyeL=new THREE.Mesh(new THREE.SphereGeometry(0.07,8,8),eyeMat);eyeL.position.set(0.15,1.55,0.98);
+let eyeR=new THREE.Mesh(new THREE.SphereGeometry(0.07,8,8),eyeMat);eyeR.position.set(-0.15,1.55,0.98);
+let pupilMat=new THREE.MeshStandardMaterial({color:0x000000});
+let pupilL=new THREE.Mesh(new THREE.SphereGeometry(0.04,8,8),pupilMat);pupilL.position.set(0.15,1.55,1.02);
+let pupilR=new THREE.Mesh(new THREE.SphereGeometry(0.04,8,8),pupilMat);pupilR.position.set(-0.15,1.55,1.02);
+dinoGroup.add(body,head,snout,tail,ll,lr,eyeL,eyeR,pupilL,pupilR);
+dinoGroup.userData.legs=[ll,lr];
 
-    rocks = [];
-    const rockGeo = new THREE.DodecahedronGeometry(0.5, 0);
-    const rockMat = new THREE.MeshStandardMaterial({ color:0x8a7a5a });
-    for (let i=0;i<16;i++){
-      const side = i%2===0 ? -1 : 1;
-      const m = new THREE.Mesh(rockGeo, rockMat);
-      m.position.set(side*(6+Math.random()*2), 0.4, -10 - i*10 - Math.random()*6);
-      m.rotation.set(Math.random(),Math.random(),Math.random());
-      m.castShadow = true;
-      scene.add(m); rocks.push(m);
-    }
+let spineGeo=new THREE.ConeGeometry(0.07,0.22,4);
+let spineMat=new THREE.MeshStandardMaterial({color:d.id==='sangriento'?0xff0000:d.id==='dorado'?0xffd700:d.id==='hielo'?0x88ccff:0x444444,roughness:0.3});
+for(let i=0;i<5;i++){let spine=new THREE.Mesh(spineGeo,spineMat);spine.position.set(0,1.25+(i*0.15),-0.2+(i*0.12));spine.castShadow=true;dinoGroup.add(spine)}
 
-    const starGeo = new THREE.BufferGeometry();
-    const starCount = 200;
-    const starPos = new Float32Array(starCount*3);
-    for(let i=0;i<starCount;i++){
-      starPos[i*3] = (Math.random()-0.5)*80;
-      starPos[i*3+1] = 6 + Math.random()*25;
-      starPos[i*3+2] = -Math.random()*120;
-    }
-    starGeo.setAttribute('position', new THREE.BufferAttribute(starPos,3));
-    const starMat = new THREE.PointsMaterial({ color:0xffffff, size:0.35 });
-    stars = new THREE.Points(starGeo, starMat);
-    scene.add(stars);
+if(d.id==='dorado'){for(let i=0;i<2;i++){let wing=new THREE.Mesh(new THREE.BoxGeometry(0.05,0.3,0.5),new THREE.MeshStandardMaterial({color:0xffd700,emissive:0xffd700,emissiveIntensity:0.4,transparent:true,opacity:0.7}));wing.position.set(i===0?0.5:-0.5,1.2,0);wing.rotation.z=i===0?0.4:-0.4;dinoGroup.add(wing)}}
+if(d.id==='hielo'){for(let i=0;i<2;i++){let wing=new THREE.Mesh(new THREE.BoxGeometry(0.04,0.35,0.45),new THREE.MeshStandardMaterial({color:0x88ccff,emissive:0x88ccff,emissiveIntensity:0.5,transparent:true,opacity:0.6}));wing.position.set(i===0?0.55:-0.55,1.15,0);wing.rotation.z=i===0?0.5:-0.5;dinoGroup.add(wing)}}
+if(d.id==='fantasma'){for(let i=0;i<2;i++){let wing=new THREE.Mesh(new THREE.BoxGeometry(0.03,0.4,0.5),new THREE.MeshStandardMaterial({color:0xd8c8ff,emissive:0xd8c8ff,emissiveIntensity:0.3,transparent:true,opacity:0.4}));wing.position.set(i===0?0.5:-0.5,1.2,0);wing.rotation.z=i===0?0.35:-0.35;dinoGroup.add(wing)}}
 
-    dinoGroup = new THREE.Group();
-    scene.add(dinoGroup);
+let acc=ACCESSORIES.find(a=>a.id===state.selectedAccessory);
+if(acc&&acc.emoji){let size=0.7;if(acc.id==='alas_angel'||acc.id==='alas_demonio')size=1.0;let as=makeEmoji(acc.emoji,size);as.position.set(0,1.85,0.75);dinoGroup.add(as)}
 
-    threeReady = true;
-  }
+dinoGroup.rotation.set(0,Math.PI,0);
+dinoGroup.position.set(LANES[gameState.laneIndex],gameState.y,0);
+}
 
-  function applyMapVisuals(){
-    const m = MAPS[state.selectedMap];
-    scene.fog = new THREE.Fog(m.sky, m.fogNear, m.fogFar);
-    groundMat.color.setHex(m.ground);
-    const topHex = '#'+m.sky.toString(16).padStart(6,'0');
-    const bottomHex = state.selectedMap==='noche' ? '#12183f' : (state.selectedMap==='tarde' ? '#ffd9a0' : '#eaf7ff');
-    skyDome.material.map.dispose();
-    skyDome.material.map = (function(){
-      const cnv = document.createElement('canvas'); cnv.width=2; cnv.height=256;
-      const c2 = cnv.getContext('2d');
-      const g = c2.createLinearGradient(0,0,0,256);
-      g.addColorStop(0, topHex); g.addColorStop(1, bottomHex);
-      c2.fillStyle = g; c2.fillRect(0,0,2,256);
-      const tex = new THREE.CanvasTexture(cnv); tex.needsUpdate = true; return tex;
-    })();
-    skyDome.material.needsUpdate = true;
-    ambient.color.setHex(m.sky); ambient.groundColor.setHex(m.ground); ambient.intensity = m.ambientI;
-    sun.color.setHex(m.sun); sun.intensity = m.sunI;
-    stars.visible = m.stars;
-    moonSprite.visible = m.stars;
-    clouds.forEach(function(c){ c.visible = !m.stars; });
-    document.getElementById('mapName').textContent = m.name;
-  }
-  function safeApplyMapVisuals(){ if (threeReady) applyMapVisuals(); }
+function goToMenu(){
+gameState.running=false;paused=false;$('pauseOverlay').classList.add('hidden');$('pauseBtn').textContent='⏸️';
+obstacles.forEach(o=>scene.remove(o.mesh));coins.forEach(c=>scene.remove(c.mesh));powerUps.forEach(p=>scene.remove(p.mesh));particles.forEach(p=>scene.remove(p));portals.forEach(p=>scene.remove(p.mesh));
+obstacles=[];coins=[];powerUps=[];particles=[];portals=[];
+$('gameOverPanel').classList.add('hidden');$('overlay').classList.remove('hidden');$('passwordPanel').classList.add('hidden');$('clothingPanel').classList.add('hidden');
+state.totalCoins=(state.totalCoins||0)+gameState.coins;saveData(STORAGE_KEY,state);renderMenus();updateHUD();
+}
 
-  function makeEmojiSprite(emoji, size){
-    const cnv = document.createElement('canvas');
-    cnv.width = 128; cnv.height = 128;
-    const c = cnv.getContext('2d');
-    c.font = '96px serif';
-    c.textAlign = 'center'; c.textBaseline = 'middle';
-    c.fillText(emoji, 64, 70);
-    const tex = new THREE.CanvasTexture(cnv);
-    const mat = new THREE.SpriteMaterial({ map:tex, transparent:true });
-    const spr = new THREE.Sprite(mat);
-    spr.scale.set(size, size, 1);
-    return spr;
-  }
+function resetGame(){
+obstacles.forEach(o=>scene.remove(o.mesh));coins.forEach(c=>scene.remove(c.mesh));powerUps.forEach(p=>scene.remove(p.mesh));particles.forEach(p=>scene.remove(p));portals.forEach(p=>scene.remove(p.mesh));
+obstacles=[];coins=[];powerUps=[];particles=[];portals=[];
+comboCount=0;comboTimer=0;lastPortalScore=0;lastFlyingScore=0;lastLaneMove=0;
+paused=false;$('pauseOverlay').classList.add('hidden');$('pauseBtn').textContent='⏸️';
+let d=DINOS.find(x=>x.id===state.selectedDino);
+gameState={laneIndex:1,vy:0,jumping:false,ducking:false,y:0,speed:d&&d.special==='speed'?0.18:0.14,score:0,coins:0,lives:3,running:true,spawnTimer:45,walkT:0,hasShield:false,shieldTimer:0,hasMagnet:false,magnetTimer:0,hasSpeed:false,speedTimer:0,hasSuperJump:false,superJumpTimer:0,hasInvincible:false,invincibleTimer:0,hasFreeze:false,freezeTimer:0,hasTerror:false,terrorTimer:0,hasWeb:false,webTimer:0,isGhost:d?d.ghost:false,specialReady:true,specialCooldown:0};
+if(dinoGroup){dinoGroup.position.set(LANES[1],0,0);dinoGroup.scale.set(1,1,1);dinoGroup.rotation.set(0,Math.PI,0)}
+$('comboText').style.opacity='0';updateHUD();
+}
 
-  let dinoShadowBlob = null;
-  function buildDino(){
-    scene.remove(dinoGroup);
-    if (dinoShadowBlob) scene.remove(dinoShadowBlob);
-    dinoShadowBlob = makeShadowBlob(1.3);
-    dinoShadowBlob.position.set(LANES[laneIndex], 0.015, 0);
-    scene.add(dinoShadowBlob);
-    dinoGroup = new THREE.Group();
-    const d = DINOS.find(function(x){ return x.id===state.selectedDino; });
-    const matOpts = { color:d.color };
-    if (d.ghost){ matOpts.transparent = true; matOpts.opacity = 0.55; matOpts.emissive = 0x8866ff; matOpts.emissiveIntensity = 0.4; }
-    const mat = new THREE.MeshStandardMaterial(matOpts);
+function updateHUD(){
+$('score').textContent=Math.floor(gameState.score);$('coinCount').textContent=gameState.coins;$('highScore').textContent=state.highScore;
+$('livesDisplay').textContent='❤️'.repeat(Math.max(0,gameState.lives||0));
+let d=DINOS.find(x=>x.id===state.selectedDino);
+$('specialBadge').textContent=(d?d.specialEmoji:'')+' '+(d?d.specialName:'');$('specialBadge').style.display=gameState.specialReady?'inline':'none';
+$('ghostBadge').style.display=gameState.isGhost?'inline':'none';$('shieldBadge').style.display=gameState.hasShield?'inline':'none';
+$('magnetBadge').style.display=gameState.hasMagnet?'inline':'none';$('speedBadge').style.display=gameState.hasSpeed?'inline':'none';
+$('jumpBadge').style.display=gameState.hasSuperJump?'inline':'none';$('invBadge').style.display=gameState.hasInvincible?'inline':'none';
+$('terrorBadge').style.display=gameState.hasTerror?'inline':'none';$('webBadge').style.display=gameState.hasWeb?'inline':'none';
+}
 
-    const body = new THREE.Mesh(new THREE.BoxGeometry(0.95,0.85,1.5), mat);
-    body.position.set(0,0.95,0); body.castShadow = true;
-    const head = new THREE.Mesh(new THREE.BoxGeometry(0.62,0.55,0.62), mat);
-    head.position.set(0,1.55,0.85); head.castShadow = true;
-    const snout = new THREE.Mesh(new THREE.BoxGeometry(0.4,0.3,0.4), mat);
-    snout.position.set(0,1.42,1.25); snout.castShadow = true;
-    const tail = new THREE.Mesh(new THREE.BoxGeometry(0.4,0.35,0.9), mat);
-    tail.position.set(0,0.85,-1.05); tail.rotation.x = 0.25; tail.castShadow = true;
-    const legGeo = new THREE.BoxGeometry(0.3,0.55,0.35);
-    const legL = new THREE.Mesh(legGeo, mat); legL.position.set(-0.28,0.28,0.15); legL.castShadow = true;
-    const legR = new THREE.Mesh(legGeo, mat); legR.position.set(0.28,0.28,-0.1); legR.castShadow = true;
-    const eye = new THREE.Mesh(new THREE.BoxGeometry(0.1,0.1,0.05), new THREE.MeshStandardMaterial({color:0xffffff}));
-    eye.position.set(0.2,1.65,1.15);
+function jump(){if(!gameState.running||paused)return;if(!gameState.jumping){gameState.vy=gameState.hasSuperJump?0.38:0.3;gameState.jumping=true;sfxJump()}}
+function setDuck(on){if(gameState.running&&!paused)gameState.ducking=on}
+function moveLane(dir){if(!gameState.running||paused)return;let now=Date.now();if(now-lastLaneMove<250)return;lastLaneMove=now;gameState.laneIndex=Math.max(0,Math.min(2,gameState.laneIndex+dir))}
+function startGame(){initAudio();$('overlay').classList.add('hidden');$('gameOverPanel').classList.add('hidden');$('passwordPanel').classList.add('hidden');$('clothingPanel').classList.add('hidden');$('menuBtn').style.display='flex';$('pauseBtn').style.display='flex';buildDino();resetGame()}
 
-    dinoGroup.add(body, head, snout, tail, legL, legR, eye);
-    dinoGroup.userData.legs = [legL, legR];
+function endGame(){
+if(!gameState.running)return;
+if(gameState.hasShield||gameState.hasInvincible){gameState.hasShield=false;gameState.shieldTimer=0;gameState.hasInvincible=false;gameState.invincibleTimer=0;updateHUD();return}
+if(gameState.isGhost)return;
 
-    if (d.ghost){
-      const ghostSprite = makeEmojiSprite('👻', 0.6);
-      ghostSprite.position.set(-0.5, 2.15, 0.6);
-      dinoGroup.add(ghostSprite);
-    }
-    const acc = ACCESSORIES.find(function(a){ return a.id===state.selectedAccessory; });
-    if (acc && acc.emoji){
-      const accessorySprite = makeEmojiSprite(acc.emoji, 0.7);
-      accessorySprite.position.set(0, 2.05, 0.85);
-      dinoGroup.add(accessorySprite);
-    }
+gameState.lives--;
+$('damageFlash').style.opacity='1';setTimeout(()=>$('damageFlash').style.opacity='0',200);
+createParticles(dinoGroup.position.clone(),0xff4444,20);
 
-    dinoGroup.position.set(LANES[laneIndex],0,0);
-    scene.add(dinoGroup);
-  }
-  function safeBuildDino(){ if (threeReady) buildDino(); }
+if(gameState.lives>0){gameState.hasInvincible=true;gameState.invincibleTimer=60;sfxCrash();updateHUD();return;}
 
-  // ================= GAME STATE =================
-  const DUCK_SCALE = 0.55;
-  const JUMP_CLEAR = 0.85;
-  let laneIndex = 1;
-  let physics = { vy:0, jumping:false, ducking:false, y:0 };
-  let obstacles = [];
-  let speed, score, running, spawnFrames, walkT;
+gameState.running=false;sfxCrash();
+createParticles(dinoGroup.position.clone(),0xff4444,30);
+let fs=Math.floor(gameState.score);let nr=fs>state.highScore;
+if(nr){state.highScore=fs;sfxRecord()}
+state.totalCoins=(state.totalCoins||0)+gameState.coins;saveData(STORAGE_KEY,state);
+$('finalScore').textContent=fs;$('finalRecord').textContent=state.highScore;$('finalCoins').textContent=gameState.coins;
+$('newRecordBadge').classList.toggle('hidden',!nr);$('gameOverPanel').classList.remove('hidden');updateHUD();
+}
 
-  function resetGame(){
-    obstacles.forEach(function(o){ scene.remove(o.mesh); });
-    obstacles = [];
-    laneIndex = 1;
-    physics = { vy:0, jumping:false, ducking:false, y:0 };
-    dinoGroup.position.set(LANES[laneIndex],0,0);
-    dinoGroup.scale.set(1,1,1);
-    speed = 0.15;
-    score = 0;
-    spawnFrames = 60;
-    walkT = 0;
-    running = true;
-  }
+function activateSpecial(){
+if(!gameState.running||paused||!gameState.specialReady)return;
+let d=DINOS.find(x=>x.id===state.selectedDino);
+if(!d||!d.special||d.special==='ghost')return;
+gameState.specialReady=false;gameState.specialCooldown=500;
+sfxSpecial();createParticles(dinoGroup.position.clone().add(new THREE.Vector3(0,1.5,1)),d.color,20);
+switch(d.special){
+case'speed':gameState.hasSpeed=true;gameState.speedTimer=300;break;
+case'jump':gameState.hasSuperJump=true;gameState.superJumpTimer=300;break;
+case'shield':gameState.hasShield=true;gameState.shieldTimer=300;break;
+case'magnet':gameState.hasMagnet=true;gameState.magnetTimer=300;break;
+case'invincible':gameState.hasInvincible=true;gameState.invincibleTimer=300;break;
+case'combo':comboCount+=5;comboTimer=300;break;
+case'freeze':gameState.hasFreeze=true;gameState.freezeTimer=300;break;
+case'terror':gameState.hasTerror=true;gameState.terrorTimer=300;sfxTerror();obstacles.forEach(o=>{createParticles(o.mesh.position,0xff0000,5);scene.remove(o.mesh)});obstacles=[];break;
+case'web':gameState.hasWeb=true;gameState.webTimer=300;break;
+}
+updateHUD();
+}
 
-  function makeCactus(lane){
-    const g = new THREE.Group();
-    const cMat = new THREE.MeshStandardMaterial({ color: state.selectedMap==='noche' ? 0x6fae6f : 0x2e7d32 });
-    const h = 0.9 + Math.random()*0.5;
-    const trunk = new THREE.Mesh(new THREE.BoxGeometry(0.35,h,0.35), cMat);
-    trunk.position.y = h/2; trunk.castShadow = true;
-    g.add(trunk);
-    if (Math.random()>0.4){
-      const arm = new THREE.Mesh(new THREE.BoxGeometry(0.2,0.4,0.2), cMat);
-      arm.position.set(0.28, h*0.6, 0); arm.castShadow = true;
-      g.add(arm);
-    }
-    const blob = makeShadowBlob(1.1);
-    blob.position.y = 0.012;
-    g.add(blob);
-    g.position.set(LANES[lane],0,-58);
-    scene.add(g);
-    return { mesh:g, z:-58, lane:lane, type:'cactus', checked:false };
-  }
-  function makeBird(lane){
-    const spr = makeEmojiSprite('🦅', 0.9);
-    spr.position.set(LANES[lane], 1.75, -58);
-    scene.add(spr);
-    return { mesh:spr, z:-58, lane:lane, type:'bird', checked:false, baseY:1.75 };
-  }
+function spawnFlyingObstacle(){
+let lane=Math.floor(Math.random()*3);
+if(Math.random()<0.5){let s=makeEmoji('💀',0.75);s.position.set(LANES[lane],1.8,-60);scene.add(s);obstacles.push({mesh:s,z:-60,lane,type:'bird',baseY:1.8,checked:false})}
+else{let s=makeEmoji('👻',0.7);s.position.set(LANES[lane],2.0,-60);scene.add(s);obstacles.push({mesh:s,z:-60,lane,type:'bird',baseY:2.0,checked:false})}
+}
 
-  function jump(){
-    if (!running) return;
-    if (!physics.jumping){ physics.vy = 0.235; physics.jumping = true; }
-  }
-  function setDuck(on){ if (running) physics.ducking = on; }
-  function moveLane(dir){
-    if (!running) return;
-    laneIndex = Math.max(0, Math.min(2, laneIndex + dir));
-  }
+function spawnObstacle(){
+let lane=Math.floor(Math.random()*3);
+let g=new THREE.Group();let cm=new THREE.MeshStandardMaterial({color:state.selectedMap==='noche'?0x4a8e4a:state.selectedMap==='espacio'?0x6644aa:0x2e7d32});
+let h=0.9+Math.random()*0.8;let trunk=new THREE.Mesh(new THREE.BoxGeometry(0.4,h,0.4),cm);trunk.position.y=h/2;trunk.castShadow=true;g.add(trunk);
+if(Math.random()>0.3){let arm=new THREE.Mesh(new THREE.BoxGeometry(0.22,0.4,0.22),cm);arm.position.set(0.32,h*0.55,0);arm.castShadow=true;g.add(arm)}
+g.position.set(LANES[lane],0,-60);scene.add(g);obstacles.push({mesh:g,z:-60,lane,type:'cactus',checked:false})
+}
 
-  function startGame(){
-    document.getElementById('overlay').classList.add('hidden');
-    resetGame();
-  }
-  function endGame(){
-    running = false;
-    if (score > state.highScore){ state.highScore = Math.floor(score); saveState(); }
-    document.getElementById('highScore').textContent = state.highScore;
-    setTimeout(function(){
-      const ov = document.getElementById('overlay');
-      document.getElementById('title').textContent = '💥 ¡Perdiste! Puntaje: ' + Math.floor(score);
-      ov.classList.remove('hidden');
-      document.getElementById('playBtn').textContent = '▶️ JUGAR DE NUEVO (Espacio)';
-    }, 350);
-  }
+function spawnCoin(){if(Math.random()>0.5)return;let lane=Math.floor(Math.random()*3);let s=makeEmoji('🪙',0.55);s.position.set(LANES[lane],1.3,-60);scene.add(s);coins.push({mesh:s,z:-60,lane,collected:false})}
+function spawnPowerUp(){if(Math.random()>0.06)return;let lane=Math.floor(Math.random()*3);let types=['shield','magnet','speed','superJump','invincible'];let type=types[Math.floor(Math.random()*types.length)];let emojis={shield:'🛡️',magnet:'🧲',speed:'⚡',superJump:'🦘',invincible:'🌟'};let s=makeEmoji(emojis[type],0.7);s.position.set(LANES[lane],1.45,-60);scene.add(s);powerUps.push({mesh:s,z:-60,lane,type,collected:false})}
+function spawnPortal(){let lane=Math.floor(Math.random()*3);let spr=makeEmoji('🌀',1.2);spr.position.set(LANES[lane],1.5,-60);scene.add(spr);portals.push({mesh:spr,z:-60,lane,active:false})}
 
-  function update(){
-    if (!threeReady) return;
-    const scrollSpeed = running ? speed : 0.03;
+function changeMap(){
+let idx=MAP_KEYS.indexOf(state.selectedMap);state.selectedMap=MAP_KEYS[(idx+1)%MAP_KEYS.length];
+applyMap();sfxPortal();lastPortalScore=Math.floor(gameState.score);lastFlyingScore=Math.floor(gameState.score);
+createParticles(dinoGroup.position.clone().add(new THREE.Vector3(0,1.5,2)),0xaa66ff,25);
+}
 
-    dashesA.forEach(function(d){ d.position.z += scrollSpeed; if (d.position.z > 6) d.position.z -= TRACK_LEN; });
-    dashesB.forEach(function(d){ d.position.z += scrollSpeed; if (d.position.z > 6) d.position.z -= TRACK_LEN; });
-    rocks.forEach(function(r){
-      r.position.z += scrollSpeed*0.9;
-      if (r.position.z > 6){ r.position.z -= 160; r.position.x = (r.position.x<0?-1:1)*(6+Math.random()*2); }
-    });
-    if (state.selectedMap==='noche') stars.rotation.y += 0.0003;
+function update(){
+if(!threeReady)return;
+if(paused)return;
+let ss=gameState.running?gameState.speed:0.03;
+dashesA.forEach(d=>{d.position.z+=ss;if(d.position.z>6)d.position.z-=TRACK_LEN});
+dashesB.forEach(d=>{d.position.z+=ss;if(d.position.z>6)d.position.z-=TRACK_LEN});
+rocks.forEach(r=>{r.position.z+=ss*0.9;if(r.position.z>6){r.position.z-=180;r.position.x=(r.position.x<0?-1:1)*(5.5+Math.random()*2.5)}});
+if(state.selectedMap==='noche'||state.selectedMap==='espacio')stars.rotation.y+=0.0004;
+dinoGroup.position.x+=(LANES[gameState.laneIndex]-dinoGroup.position.x)*0.1;
+dinoGroup.rotation.set(0,Math.PI,0);
+let ctx=dinoGroup.position.x*0.3;camera.position.x+=(ctx-camera.position.x)*0.04;
+camera.position.y=3.2+(gameState.y*0.3);camera.position.z=6.5;camera.lookAt(camera.position.x*0.2,1.2+gameState.y*0.2,-10);
+skyDome.position.set(camera.position.x,0,camera.position.z);
+clouds.forEach(c=>{c.position.z+=ss*0.15;if(c.position.z-camera.position.z>45)c.position.z=camera.position.z-95-Math.random()*45});
+if(dinoShadowBlob){dinoShadowBlob.position.x=dinoGroup.position.x;dinoShadowBlob.position.z=dinoGroup.position.z;dinoShadowBlob.material.opacity=Math.max(0,0.5-(dinoGroup.position.y||0)*0.5)}
+if(!gameState.running){$('menuBtn').style.display='flex';$('pauseBtn').style.display='flex';return;}
+$('menuBtn').style.display='flex';$('pauseBtn').style.display='flex';
+gameState.vy-=0.013;gameState.y+=gameState.vy;
+if(gameState.y<=0){gameState.y=0;gameState.vy=0;gameState.jumping=false}
+dinoGroup.position.y=gameState.y;
+let ts=(gameState.ducking&&!gameState.jumping)?0.48:1;dinoGroup.scale.y+=(ts-dinoGroup.scale.y)*0.35;
+gameState.walkT+=gameState.speed*2.4;
+if(dinoGroup.userData.legs){dinoGroup.userData.legs[0].rotation.x=Math.sin(gameState.walkT)*0.55;dinoGroup.userData.legs[1].rotation.x=Math.sin(gameState.walkT+Math.PI)*0.55}
+let baseSpeed=gameState.hasSpeed?0.24:0.14;gameState.speed=Math.min(gameState.speed+(gameState.speed<baseSpeed?0.002:0.00004),0.55);
+gameState.score+=gameState.speed*4.2;
+if(gameState.hasShield){gameState.shieldTimer--;if(gameState.shieldTimer<=0)gameState.hasShield=false}
+if(gameState.hasMagnet){gameState.magnetTimer--;if(gameState.magnetTimer<=0)gameState.hasMagnet=false}
+if(gameState.hasSpeed){gameState.speedTimer--;if(gameState.speedTimer<=0)gameState.hasSpeed=false}
+if(gameState.hasSuperJump){gameState.superJumpTimer--;if(gameState.superJumpTimer<=0)gameState.hasSuperJump=false}
+if(gameState.hasInvincible){gameState.invincibleTimer--;if(gameState.invincibleTimer<=0)gameState.hasInvincible=false}
+if(gameState.hasFreeze){gameState.freezeTimer--;if(gameState.freezeTimer<=0)gameState.hasFreeze=false}
+if(gameState.hasTerror){gameState.terrorTimer--;if(gameState.terrorTimer<=0)gameState.hasTerror=false}
+if(gameState.hasWeb){gameState.webTimer--;if(gameState.webTimer<=0)gameState.hasWeb=false}
+if(!gameState.specialReady){gameState.specialCooldown--;if(gameState.specialCooldown<=0){gameState.specialReady=true;sfxPowerUp()}}
+if(Math.floor(gameState.score)-lastPortalScore>=1000&&portals.length===0){spawnPortal();lastPortalScore=Math.floor(gameState.score)}
+if(Math.floor(gameState.score)-lastFlyingScore>=2000){spawnFlyingObstacle();lastFlyingScore=Math.floor(gameState.score)}
+comboTimer--;if(comboTimer<=0){comboCount=0;$('comboText').style.opacity='0'}
+gameState.spawnTimer--;
+if(gameState.spawnTimer<=0){spawnObstacle();spawnCoin();spawnPowerUp();gameState.spawnTimer=38+Math.floor(Math.random()*35)}
+let di=DINOS.find(x=>x.id===state.selectedDino);
+let isInv=gameState.hasShield||gameState.hasInvincible||gameState.hasTerror||(di&&di.ghost);
+let freezeMult=gameState.hasFreeze||gameState.hasWeb?0.4:1;
+for(let o of obstacles){
+o.z+=gameState.speed*freezeMult;o.mesh.position.z=o.z;
+if(o.type==='bird')o.mesh.position.y=o.baseY+Math.sin(gameState.walkT*1.5)*0.15;
+if(!o.checked&&o.z>-0.5&&o.z<0.5){o.checked=true;if(o.lane===gameState.laneIndex&&!isInv){if(o.type==='cactus'&&gameState.y<0.9)endGame();if(o.type==='bird'&&!gameState.ducking)endGame()}else if(o.lane===gameState.laneIndex){comboCount++;comboTimer=90;if(comboCount>=3){$('comboText').textContent='🔥 COMBO x'+comboCount;$('comboText').style.opacity='1';createParticles(o.mesh.position,0xffd700,6)}}}
+}
+obstacles=obstacles.filter(o=>{if(o.z>3){scene.remove(o.mesh);return false}return true});
+for(let c of coins){
+c.z+=gameState.speed;c.mesh.position.z=c.z;
+if(gameState.hasMagnet&&Math.abs(c.z)<8){c.mesh.position.x+=(dinoGroup.position.x-c.mesh.position.x)*0.08;c.mesh.position.y+=(dinoGroup.position.y+1.3-c.mesh.position.y)*0.08}
+if(!c.collected&&Math.abs(c.z)<0.7&&c.lane===gameState.laneIndex){c.collected=true;gameState.coins++;sfxCoin();scene.remove(c.mesh)}
+}
+coins=coins.filter(c=>{if(c.z>3||c.collected){if(!c.collected)scene.remove(c.mesh);return false}return true});
+for(let p of powerUps){
+p.z+=gameState.speed;p.mesh.position.z=p.z;
+if(!p.collected&&Math.abs(p.z)<0.7&&p.lane===gameState.laneIndex){p.collected=true;sfxPowerUp();createParticles(p.mesh.position,0xffffff,10);let pd=300;if(p.type==='shield'){gameState.hasShield=true;gameState.shieldTimer=pd}else if(p.type==='magnet'){gameState.hasMagnet=true;gameState.magnetTimer=pd}else if(p.type==='speed'){gameState.hasSpeed=true;gameState.speedTimer=pd}else if(p.type==='superJump'){gameState.hasSuperJump=true;gameState.superJumpTimer=pd}else if(p.type==='invincible'){gameState.hasInvincible=true;gameState.invincibleTimer=pd}scene.remove(p.mesh)}
+}
+powerUps=powerUps.filter(p=>{if(p.z>3||p.collected){if(!p.collected)scene.remove(p.mesh);return false}return true});
+for(let pt of portals){
+pt.z+=gameState.speed;pt.mesh.position.z=pt.z;pt.mesh.rotation.z+=0.03;
+if(!pt.active&&Math.abs(pt.z)<0.7&&pt.lane===gameState.laneIndex){pt.active=true;changeMap()}
+}
+portals=portals.filter(pt=>{if(pt.z>3){scene.remove(pt.mesh);return false}return true});
+particles=particles.filter(p=>{p.userData.life-=0.02;p.position.add(p.userData.vel.clone().multiplyScalar(0.05));p.userData.vel.y-=0.05;p.material.opacity=p.userData.life;if(p.userData.life<=0){scene.remove(p);return false}return true});
+updateHUD();
+}
 
-    // el dino siempre se desliza hacia su carril actual (aunque no este jugando)
-    dinoGroup.position.x += (LANES[laneIndex] - dinoGroup.position.x) * 0.22;
-    // camara sigue un poco el carril para ver bien de frente lo que viene
-    const camTargetX = dinoGroup.position.x * 0.55;
-    camera.position.x += (camTargetX - camera.position.x) * 0.08;
-    camera.lookAt(camera.position.x*0.3, 1.6, -18);
-    // el cielo y las nubes viajan con la camara para que el horizonte nunca se acabe
-    skyDome.position.set(camera.position.x, 0, camera.position.z);
-    clouds.forEach(function(c, i){
-      c.position.z += scrollSpeed*0.15;
-      if (c.position.z - camera.position.z > 40){ c.position.z = camera.position.z - 90 - Math.random()*40; }
-    });
-    // sombra de contacto: sigue al dino en x/z y se desvanece cuando salta
-    if (dinoShadowBlob){
-      dinoShadowBlob.position.x = dinoGroup.position.x;
-      dinoShadowBlob.material.opacity = Math.max(0, 0.55 - (dinoGroup.position.y||0)*0.6);
-    }
+function animate(){requestAnimationFrame(animate);try{update();if(threeReady)renderer.render(scene,camera)}catch(e){}}
 
-    if (!running) return;
-    const d = DINOS.find(function(x){ return x.id===state.selectedDino; });
+function renderMenus(){
+let dr=$('dinoRow');dr.innerHTML='';
+DINOS.forEach(d=>{let el=document.createElement('div');el.className='swatch'+(state.selectedDino===d.id?' selected':'')+(d.locked?' locked':'');el.innerHTML='<div class="dinoIcon" style="background:#'+d.color.toString(16).padStart(6,'0')+'"></div><span>'+d.name+'</span><span style="font-size:5px;color:#ffd700">'+(d.locked?'🔒':d.specialEmoji)+'</span>';el.onclick=function(e){e.stopPropagation();if(d.locked){showPasswordPanel(d.id)}else{state.selectedDino=d.id;saveData(STORAGE_KEY,state);renderMenus();if(threeReady)buildDino()}};dr.appendChild(el)});
+let sd=DINOS.find(x=>x.id===state.selectedDino);
+$('ghostNote').textContent=sd?(sd.locked?'🔒 BLOQUEADO':('⭐ Poder: '+sd.specialName+' '+sd.specialEmoji)):'';
+let mr=$('mapRow');mr.innerHTML='';
+Object.keys(MAPS).forEach(k=>{let m=MAPS[k];let el=document.createElement('div');el.className='mapCard'+(state.selectedMap===k?' selected':'');el.style.background='#'+m.sky.toString(16).padStart(6,'0');el.style.color=(k==='noche'||k==='espacio')?'#fff':'#222';el.textContent=m.name;el.onclick=function(e){e.stopPropagation();state.selectedMap=k;saveData(STORAGE_KEY,state);renderMenus();if(threeReady)applyMap()};mr.appendChild(el)});
+$('highScore').textContent=state.highScore;
+}
 
-    physics.vy -= 0.014;
-    physics.y += physics.vy;
-    if (physics.y <= 0){ physics.y = 0; physics.vy = 0; physics.jumping = false; }
-    dinoGroup.position.y = physics.y;
+window.addEventListener('keydown',function(e){
+if(e.code==='Space'||e.code==='ArrowUp'){e.preventDefault();if(!$('overlay').classList.contains('hidden')||!$('gameOverPanel').classList.contains('hidden'))startGame();else jump()}
+if(e.code==='ArrowDown'||e.code==='KeyS'){e.preventDefault();setDuck(true)}
+if(e.code==='ArrowLeft'||e.code==='KeyA'){moveLane(-1)}
+if(e.code==='ArrowRight'||e.code==='KeyD'){moveLane(1)}
+if(e.code==='KeyE'||e.code==='KeyQ'){e.preventDefault();activateSpecial()}
+if(e.code==='KeyP'||e.code==='Escape'){e.preventDefault();togglePause()}
+});
+window.addEventListener('keyup',function(e){if(e.code==='ArrowDown'||e.code==='KeyS')setDuck(false)});
 
-    const targetScale = (physics.ducking && !physics.jumping) ? DUCK_SCALE : 1;
-    dinoGroup.scale.y += (targetScale - dinoGroup.scale.y) * 0.35;
+let ts2=null,tt=null,hold=false,swiped=false,lastTap=0;
+$('gameWrap').addEventListener('touchstart',function(e){
+if(e.target.closest('button')||e.target.closest('.swatch')||e.target.closest('.mapCard')||e.target.closest('#passwordPanel')||e.target.closest('#clothingPanel'))return;
+let t=e.touches[0];ts2={x:t.clientX,y:t.clientY,t:Date.now()};hold=false;swiped=false;
+tt=setTimeout(()=>{hold=true;setDuck(true)},400);
+let now=Date.now();if(now-lastTap<350&&gameState.running&&!paused){activateSpecial();lastTap=0}else{lastTap=now}
+},{passive:true});
+$('gameWrap').addEventListener('touchmove',function(e){
+if(!ts2)return;let t=e.touches[0],dx=t.clientX-ts2.x,dy=t.clientY-ts2.y;
+if(Math.abs(dx)>25||Math.abs(dy)>25)swiped=true;
+if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy)&&!hold){moveLane(dx>0?1:-1);ts2=null;clearTimeout(tt);setDuck(false);return}
+},{passive:true});
+$('gameWrap').addEventListener('touchend',function(e){
+clearTimeout(tt);if(!ts2)return;
+if(e.target.closest('button')||e.target.closest('.swatch')||e.target.closest('.mapCard')||e.target.closest('#passwordPanel')||e.target.closest('#clothingPanel')){ts2=null;setDuck(false);return}
+if(hold){setDuck(false)}else if(swiped){let dy=e.changedTouches[0].clientY-ts2.y;if(dy<-45){jump()}}
+ts2=null;hold=false;
+},{passive:true});
 
-    walkT += speed*2.2;
-    if (dinoGroup.userData.legs){
-      dinoGroup.userData.legs[0].rotation.x = Math.sin(walkT)*0.5;
-      dinoGroup.userData.legs[1].rotation.x = Math.sin(walkT+Math.PI)*0.5;
-    }
+$('playBtn').addEventListener('click',function(e){e.stopPropagation();startGame()});
+$('gameOverRestart').addEventListener('click',function(e){e.stopPropagation();startGame()});
+$('gameOverMenu').addEventListener('click',function(e){e.stopPropagation();goToMenu()});
+$('menuBtn').addEventListener('click',function(e){e.stopPropagation();goToMenu()});
+$('pauseBtn').addEventListener('click',function(e){e.stopPropagation();togglePause()});
+$('passwordSubmit').addEventListener('click',function(e){e.stopPropagation();submitPassword()});
+$('passwordCancel').addEventListener('click',function(e){e.stopPropagation();hidePasswordPanel()});
+$('passwordInput').addEventListener('keydown',function(e){if(e.key==='Enter'){e.stopPropagation();submitPassword()}});
+$('openClothing').addEventListener('click',function(e){e.stopPropagation();showClothingPanel()});
+$('closeClothing').addEventListener('click',function(e){e.stopPropagation();hideClothingPanel()});
 
-    speed = Math.min(speed + 0.00006, 0.5);
-    score += speed*4;
-
-    spawnFrames -= 1;
-    if (spawnFrames <= 0){
-      const lane = Math.floor(Math.random()*3);
-      const spawnBird = score > 35 && Math.random() < 0.35;
-      obstacles.push(spawnBird ? makeBird(lane) : makeCactus(lane));
-      spawnFrames = 58 + Math.floor(Math.random()*48);
-    }
-
-    for (const o of obstacles){
-      o.z += speed;
-      o.mesh.position.z = o.z;
-      if (o.type==='bird') o.mesh.position.y = o.baseY + Math.sin(walkT*1.4)*0.12;
-
-      if (!o.checked && o.z > -0.55 && o.z < 0.55){
-        o.checked = true;
-        const sameLane = o.lane === laneIndex;
-        if (sameLane && !d.ghost){
-          if (o.type==='cactus' && physics.y < JUMP_CLEAR){ endGame(); }
-          if (o.type==='bird' && !physics.ducking){ endGame(); }
-        } else if (sameLane) {
-          // dino fantasma: no choca nunca
-        }
-      }
-    }
-    obstacles = obstacles.filter(function(o){
-      if (o.z > 3){ scene.remove(o.mesh); return false; }
-      return true;
-    });
-  }
-
-  function animate(){
-    requestAnimationFrame(animate);
-    try {
-      update();
-      if (threeReady) renderer.render(scene, camera);
-    } catch(e){ /* evita que un frame roto detenga el loop */ }
-    document.getElementById('score').textContent = Math.floor(score||0);
-  }
-
-  // ================= INPUT =================
-  window.addEventListener('keydown', function(e){
-    if (e.code==='Space' || e.code==='ArrowUp'){
-      e.preventDefault();
-      if (!document.getElementById('overlay').classList.contains('hidden')) startGame();
-      else jump();
-    }
-    if (e.code==='ArrowDown' || e.code==='KeyS'){ e.preventDefault(); setDuck(true); }
-    if (e.code==='ArrowLeft' || e.code==='KeyA'){ moveLane(-1); }
-    if (e.code==='ArrowRight' || e.code==='KeyD'){ moveLane(1); }
-  });
-  window.addEventListener('keyup', function(e){
-    if (e.code==='ArrowDown' || e.code==='KeyS'){ setDuck(false); }
-  });
-
-  // botones en pantalla (funcionan igual con mouse en PC y con dedo en movil)
-  function bindHold(elId, onDown, onUp){
-    const el = document.getElementById(elId);
-    el.addEventListener('pointerdown', function(e){ e.preventDefault(); onDown(); });
-    if (onUp){
-      el.addEventListener('pointerup', function(e){ e.preventDefault(); onUp(); });
-      el.addEventListener('pointerleave', function(e){ onUp(); });
-    }
-  }
-  bindHold('btnJump', jump);
-  bindHold('btnDuck', function(){ setDuck(true); }, function(){ setDuck(false); });
-
-  // gestos de arrastre sobre el area de juego: swipe izq/der = cambiar carril, arriba = saltar, abajo = agachar
-  const gwrap = document.getElementById('gameWrap');
-  let touchStart = null;
-  gwrap.addEventListener('touchstart', function(e){
-    const t = e.touches[0];
-    touchStart = { x:t.clientX, y:t.clientY, t:Date.now() };
-  }, {passive:true});
-  gwrap.addEventListener('touchend', function(e){
-    if (!touchStart) return;
-    const t = e.changedTouches[0];
-    const dx = t.clientX - touchStart.x;
-    const dy = t.clientY - touchStart.y;
-    const dt = Date.now() - touchStart.t;
-    if (Math.abs(dx) < 24 && Math.abs(dy) < 24 && dt < 300){
-      if (!document.getElementById('overlay').classList.contains('hidden')) { /* deja que los botones del menu manejen el tap */ }
-      else jump();
-    } else if (Math.abs(dx) > Math.abs(dy)){
-      moveLane(dx > 0 ? 1 : -1);
-    } else if (dy > 30){
-      setDuck(true); setTimeout(function(){ setDuck(false); }, 500);
-    } else if (dy < -30){
-      jump();
-    }
-    touchStart = null;
-  }, {passive:true});
-
-  document.getElementById('playBtn').addEventListener('click', startGame);
-
-  // ================= INIT =================
-  try {
-    initThree();
-    loadState().then(function(){ animate(); });
-  } catch(e){
-    const box = document.getElementById('errBox');
-    box.classList.remove('hidden');
-    box.textContent = 'No se pudo iniciar el motor 3D: ' + e.message;
-  }
+renderMenus();
+try{initThree();animate()}catch(e){console.error(e)}
 })();
 </script>
 </body>
